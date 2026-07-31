@@ -48,7 +48,5 @@ These skills are opinionated. The load-bearing opinions:
 
 ## Attribution
 
-- `grill-me` wraps the community "interview me relentlessly" prompt.
-- `tdd` is adapted from Jesse Vincent's (obra) superpowers skill collection.
-- `review` is adapted from Matt Pocock's skills setup.
+- `grill-me`, `tdd`, and `review` are adapted from [Matt Pocock's skills collection](https://github.com/mattpocock/skills).
 - `plan-in-docs`, `implement`, and `push-and-pr` are original.
