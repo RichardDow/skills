@@ -48,5 +48,5 @@ These skills are opinionated. The load-bearing opinions:
 
 ## Attribution
 
-- `grill-me`, `tdd`, and `review` are adapted from [Matt Pocock's skills collection](https://github.com/mattpocock/skills).
-- `plan-in-docs`, `implement`, and `push-and-pr` are original.
+- `grill-me`, `tdd`, `review`, and `implement` are adapted from [Matt Pocock's skills collection](https://github.com/mattpocock/skills) (`implement` extends Matt's core with branch/worktree discipline, comment candidates, and plan sync).
+- `plan-in-docs` and `push-and-pr` are original.
