@@ -1,9 +1,9 @@
 # claude-skills-loop
 
-Six [Claude Code skills](https://code.claude.com/docs/en/skills) that form one development loop: a feature travels from a half-formed intention to a merged-ready PR, and every stage's output is the next stage's input.
+Seven [Claude Code skills](https://code.claude.com/docs/en/skills) that form one development loop: a feature travels from a half-formed intention to a merged-ready PR, and every stage's output is the next stage's input.
 
 ```
-/grill-me  →  /plan-in-docs  →  /implement  →  /push-and-pr
+/grill-me  →  /plan-in-docs  →  /implement  →  /push-and-pr  →  /wrap-up-plan-in-docs
                                   ├─ /tdd
                                   └─ /review
 ```
@@ -25,12 +25,14 @@ Six [Claude Code skills](https://code.claude.com/docs/en/skills) that form one d
 
 **6. Push & PR** (`/push-and-pr`). Base branch is always asked, never guessed. The ticket key is derived from the branch name; pre-push hooks are pre-empted by running the repo's typecheck first (a rejected push teaches you nothing a local run couldn't). PR bodies follow one shape: ticket link first, then a short Why and What. If the work happened in a worktree, it's cleaned up after the push.
 
+**7. Wrap up** (`/wrap-up-plan-in-docs`). Plans drift from reality once tickets close. This sweep reads each open plan's `jira:` frontmatter, fetches the ticket's status, and syncs the lifecycle: in-flight ticket → `active` (auto), cancelled → `abandoned` (proposed, never auto — cancelled work sometimes moved to a new ticket), done with all steps ticked → `done` (auto). Done with *unticked* steps triggers an interview: each step is resolved one at a time (it happened / overtaken by events / genuinely outstanding), and the human decides whether the plan closes. The status-name table in the skill is the adaptation point for your Jira workflow — status *names* are mapped explicitly because Jira's Done category is ambiguous (a "Passed" QA column and "Cancelled" both live there).
+
 ## Install
 
 Copy any skill folder into `~/.claude/skills/` (global) or `<repo>/.claude/skills/` (project-scoped):
 
 ```bash
-cp -r grill-me plan-in-docs implement tdd review push-and-pr ~/.claude/skills/
+cp -r grill-me plan-in-docs implement tdd review push-and-pr wrap-up-plan-in-docs ~/.claude/skills/
 ```
 
 Each skill is one folder with a `SKILL.md`; tdd also bundles five reference files. They work independently — the loop is a convention, not a coupling — but implement expects `/tdd` and `/review` to exist, and plan-in-docs uses grill-me's method.
@@ -49,4 +51,4 @@ These skills are opinionated. The load-bearing opinions:
 ## Attribution
 
 - `grill-me`, `tdd`, `review`, and `implement` are adapted from [Matt Pocock's skills collection](https://github.com/mattpocock/skills) (`implement` extends Matt's core with branch/worktree discipline, comment candidates, and plan sync).
-- `plan-in-docs` and `push-and-pr` are original.
+- `plan-in-docs`, `push-and-pr`, and `wrap-up-plan-in-docs` are original.
