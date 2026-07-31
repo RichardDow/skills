@@ -12,7 +12,7 @@ Seven [Claude Code skills](https://code.claude.com/docs/en/skills) that form one
 
 **1. Grill** (`/grill-me`). Before anything is written, Claude interviews you relentlessly about the plan — one question at a time, each with a recommended answer, walking every branch of the decision tree. Questions answerable from the codebase are answered by exploring it instead of asking. The output isn't a document; it's shared understanding.
 
-**2. Plan** (`/plan-in-docs`). The resolved decision tree becomes a markdown file under `docs/plans/<date>/<slug>.md` — goal, context, decisions with their reasoning, checkable steps, risks. Plans have a lifecycle (`draft → active → done | abandoned`) tracked in frontmatter, and are never deleted: an abandoned plan is a record, not garbage. This stage invokes grill-me's method itself, so you can start here and get the interview for free.
+**2. Plan** (`/plan-in-docs`). The resolved decision tree becomes a markdown file under `docs/plans/<date>/<slug>.md` — goal, context, decisions with their reasoning, checkable steps, risks. Plans have a lifecycle (`draft → active → done | abandoned`) tracked in frontmatter, and are never deleted: an abandoned plan is a record, not garbage. This stage invokes grill-me's method itself, so you can start here and get the interview for free. Worked example: [docs/plans/2026-07-31/add-idea-skill.md](docs/plans/2026-07-31/add-idea-skill.md).
 
 **3. Implement** (`/implement`). Execution starts with git discipline: always ask which base branch to cut from, always fetch origin first, always ask whether to work in a worktree (so parallel work stays untouched). The build itself uses `/tdd` at pre-agreed seams and ends with `/review`. Two feedback loops run alongside the code:
 
