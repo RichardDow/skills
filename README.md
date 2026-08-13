@@ -3,34 +3,42 @@
 [Claude Code skills](https://code.claude.com/docs/en/skills) and an output style. The skills form one development loop: a feature travels from a half-formed intention to a merged-ready PR, and every stage's output is the next stage's input. The output style governs how the agent writes to you at every stage.
 
 ```
-/grill-me  →  /plan-in-docs  →  /implement  →  /push-and-pr  →  /wrap-up-plan-in-docs
-                 └─ /estimate      ├─ /tdd
-                                   └─ /review
+/grill-me → /plan-in-docs → /start-ticket → /implement → /push-and-pr → /wrap-up-plan-in-docs
+                └─ /estimate                    ├─ /tdd
+                                                └─ /review
 ```
 
-## The loop
+Six stages you invoke, and three skills the stages invoke for you (`/estimate` under plan, `/tdd` and `/review` under implement). Each of the three also runs standalone.
+
+## The stages
 
 **1. Grill** (`/grill-me`). Before anything is written, Claude interviews you relentlessly about the plan — one question at a time, each with a recommended answer, walking every branch of the decision tree. Questions answerable from the codebase are answered by exploring it instead of asking. The output isn't a document; it's shared understanding.
 
 **2. Plan** (`/plan-in-docs`). The resolved decision tree becomes a markdown file under `docs/plans/<date>/<slug>.md` — goal, context, decisions with their reasoning, checkable steps, risks. Plans have a lifecycle (`draft → active → done | abandoned`) tracked in frontmatter, and are never deleted: an abandoned plan is a record, not garbage. This stage invokes grill-me's method itself, so you can start here and get the interview for free. Worked example: [docs/plans/2026-07-31/add-idea-skill.md](docs/plans/2026-07-31/add-idea-skill.md).
 
-**3. Estimate** (`/estimate`, invoked by plan-in-docs). Agents write the code, so estimating typing is estimating the wrong thing. The forecast splits into agent execution, human review, and a flat one-cycle rework buffer — and the review half is *derived* from an explicit manual-verification list, every check a human must make because an agent cannot. An empty list means a half-hour review. The number lands in the plan's `estimate:` frontmatter, written once, before the work starts.
+**3. Start ticket** (`/start-ticket`). The pickup hook, and the only stage that exists because a ticket and a plan are different objects. Tickets get filed early with an estimate and no dates, so they can sit in a backlog; this is the "I am starting now" moment that fills them in. Start Date is today, Due Date is today advanced by the estimate in *working* days, and a `start-dev:` note goes into the plan so the actual effort can be measured against the forecast later. A Start Date that is already set blocks a re-stamp, and both dates are confirmed before writing — other people see them.
 
 **4. Implement** (`/implement`). Execution starts with git discipline: always ask which base branch to cut from, always fetch origin first, always ask whether to work in a worktree (so parallel work stays untouched). The build itself uses `/tdd` at pre-agreed seams. Three feedback loops run alongside the code:
 
    - *The plan stays true.* Steps get ticked as they land; divergences, deferred steps, and PR links are written back into the plan file. The plan is the source of truth, not a write-once doc.
    - *Comments are proposed, never sprinkled.* Opaque spots are collected as candidates (`file:line` + exact text + why the code can't say it) and presented for approval. The expected outcome for clear code is an empty list.
-   - *Review runs as a loop, not a gate.* See below.
+   - *Review runs as a loop, not a gate.* See `/review` below.
 
-**5. TDD** (`/tdd`, invoked by implement). Red-green-refactor with vertical slices — one test, one implementation, repeat. Tests verify behaviour through public interfaces, never implementation details. Comes with reference docs on test quality, mocking, refactoring, interface design, and deep modules.
+**5. Push & PR** (`/push-and-pr`). Base branch is always asked, never guessed. The ticket key is derived from the branch name. Two gates are pre-empted before the push, because a rejected push teaches you nothing a local run couldn't: the repo's formatter over the changed files (a CI format check rejects a single hand-wrapped line, and this is the step everyone remembers only afterwards), and the repo's typecheck. PR bodies follow one shape: ticket link first, then a short Why and What. If the work happened in a worktree, it's cleaned up after the push.
 
-**6. Review** (`/review`, or the review–fix loop inside implement). Standalone, it reviews any diff along two axes with parallel sub-agents so neither pollutes the other: **Standards** (does the diff follow the repo's documented conventions?) and **Spec** (does it faithfully implement what the issue/plan asked for?). The axes are never merged or reranked — code can pass one and fail the other, and reporting them separately stops one from masking the other.
+**6. Wrap up** (`/wrap-up-plan-in-docs`). Plans drift from reality once tickets close. This sweep reads each open plan's `jira:` frontmatter, fetches the ticket's status, and syncs the lifecycle: in-flight ticket → `active` (auto), cancelled → `abandoned` (proposed, never auto — cancelled work sometimes moved to a new ticket), done with all steps ticked → `done` (auto). Done with *unticked* steps triggers an interview: each step is resolved one at a time (it happened / overtaken by events / genuinely outstanding), and the human decides whether the plan closes. The status-name table in the skill is the adaptation point for your Jira workflow — status *names* are mapped explicitly because Jira's Done category is ambiguous (a "Passed" QA column and "Cancelled" both live there).
 
-   Inside implement it runs as a loop instead. Each round spawns a separate read-only reviewer subagent — a different model where possible, since an author reviewing its own diff mostly re-reads its own reasoning. The reviewer classifies each finding as **fix** (correctness bugs, weak tests, one obvious right answer) or **escalate** (product decisions, architecture with more than one defensible answer, public contracts, anything it's under ~80% sure about). The author applies the fixes and queues the escalations in a file written *outside* the working tree, where it can't be committed by accident. Every committed round is green. The loop stops on convergence, five rounds, or two rounds with identical findings.
+## The skills the stages invoke
 
-**7. Push & PR** (`/push-and-pr`). Base branch is always asked, never guessed. The ticket key is derived from the branch name. Two gates are pre-empted before the push, because a rejected push teaches you nothing a local run couldn't: the repo's formatter over the changed files (a CI format check rejects a single hand-wrapped line, and this is the step everyone remembers only afterwards), and the repo's typecheck. PR bodies follow one shape: ticket link first, then a short Why and What. If the work happened in a worktree, it's cleaned up after the push.
+These three are called for you by the stage above them. Each also runs standalone on anything you point it at.
 
-**8. Wrap up** (`/wrap-up-plan-in-docs`). Plans drift from reality once tickets close. This sweep reads each open plan's `jira:` frontmatter, fetches the ticket's status, and syncs the lifecycle: in-flight ticket → `active` (auto), cancelled → `abandoned` (proposed, never auto — cancelled work sometimes moved to a new ticket), done with all steps ticked → `done` (auto). Done with *unticked* steps triggers an interview: each step is resolved one at a time (it happened / overtaken by events / genuinely outstanding), and the human decides whether the plan closes. The status-name table in the skill is the adaptation point for your Jira workflow — status *names* are mapped explicitly because Jira's Done category is ambiguous (a "Passed" QA column and "Cancelled" both live there).
+**Estimate** (`/estimate`, called by plan-in-docs). Agents write the code, so estimating typing is estimating the wrong thing. The forecast splits into agent execution, human review, and a flat one-cycle rework buffer — and the review half is *derived* from an explicit manual-verification list, every check a human must make because an agent cannot. An empty list means a half-hour review. The number lands in the plan's `estimate:` frontmatter, written once, before the work starts, and start-ticket turns it into a Due Date.
+
+**TDD** (`/tdd`, called by implement). Red-green-refactor with vertical slices — one test, one implementation, repeat. Tests verify behaviour through public interfaces, never implementation details. Comes with reference docs on test quality, mocking, refactoring, interface design, and deep modules.
+
+**Review** (`/review`, called by implement). Standalone, it reviews any diff along two axes with parallel sub-agents so neither pollutes the other: **Standards** (does the diff follow the repo's documented conventions?) and **Spec** (does it faithfully implement what the issue/plan asked for?). The axes are never merged or reranked — code can pass one and fail the other, and reporting them separately stops one from masking the other.
+
+Inside implement it runs as a loop rather than a gate. Each round spawns a separate read-only reviewer subagent — a different model where possible, since an author reviewing its own diff mostly re-reads its own reasoning. The reviewer classifies each finding as **fix** (correctness bugs, weak tests, one obvious right answer) or **escalate** (product decisions, architecture with more than one defensible answer, public contracts, anything it's under ~80% sure about). The author applies the fixes and queues the escalations in a file written *outside* the working tree, where it can't be committed by accident. Every committed round is green. The loop stops on convergence, five rounds, or two rounds with identical findings.
 
 ## Output style
 
@@ -57,7 +65,7 @@ cp skills/output-styles/*.md ~/.claude/output-styles/
 
 Then select it with `/output-style` → **Plain Technical English**.
 
-The skills work independently — the loop is a convention, not a coupling — but implement expects `/tdd` and `/review` to exist, plan-in-docs expects `/estimate`, and plan-in-docs uses grill-me's method.
+The skills work independently — the loop is a convention, not a coupling — but implement expects `/tdd` and `/review` to exist, plan-in-docs expects `/estimate`, start-ticket expects an estimate on the ticket, and plan-in-docs uses grill-me's method.
 
 Note: `implement` sets `disable-model-invocation: true` — it only runs when you explicitly type `/implement`. Claude never decides on its own to start cutting branches.
 
@@ -86,7 +94,7 @@ Some divergence is the point. The script exists to catch the other kind: a genui
 ## Attribution
 
 - `grill-me`, `tdd`, `review`, and `implement` are adapted from [Matt Pocock's skills collection](https://github.com/mattpocock/skills) (MIT) — `implement` extends Matt's core with branch/worktree discipline, the review–fix loop, comment candidates, and plan sync.
-- `plan-in-docs`, `estimate`, `push-and-pr`, and `wrap-up-plan-in-docs` are original.
+- `plan-in-docs`, `estimate`, `start-ticket`, `push-and-pr`, and `wrap-up-plan-in-docs` are original.
 
 ## License
 

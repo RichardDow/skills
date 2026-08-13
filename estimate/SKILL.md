@@ -111,4 +111,5 @@ allowed round trip — not typing.
 
 - If a decision is unresolved, do not pad the estimate for it. Name it as a blocker and estimate the resolved path.
 
-**See also:** where the number is recorded — [plan-in-docs](../plan-in-docs/SKILL.md).
+**See also:** where the number is recorded — [plan-in-docs](../plan-in-docs/SKILL.md);
+how it becomes a Due Date at pickup — [start-ticket](../start-ticket/SKILL.md).
