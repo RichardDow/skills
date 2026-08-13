@@ -30,17 +30,27 @@ Push the current branch and open a PR in the repo you're in.
 
 1. Confirm work is committed: `git status --short`. If there are uncommitted
    changes relevant to this PR, stop and ask — don't push a partial branch.
-2. **Pre-empt any pre-push hook**: run the repo's typecheck (and whatever else
+2. **Run the repo's formatter over the changed files**, then commit any reflow
+   before pushing. If CI has a format check, a single hand-wrapped line fails the
+   build, and this is the step that gets forgotten until after the push:
+   ```bash
+   git diff --name-only <base>...HEAD | xargs -r <formatter> --write
+   ```
+   Prefer the repo's own script (e.g. `npm run format`) so it picks up the repo's
+   config and ignore file. Never hand-format to satisfy the formatter — run the
+   tool. This applies even where a repo's lint or typecheck is deliberately
+   skipped; formatting is a separate gate.
+3. **Pre-empt any pre-push hook**: run the repo's typecheck (and whatever else
    the hook runs — check `.husky/pre-push` or equivalent) yourself first.
    Prefer the repo's own script (e.g. `npm run typecheck`) over raw
    `tsc --noEmit` — project scripts often use a stricter, test-inclusive
    config that catches more. Fix any failures and commit before pushing.
    Skipping this just moves the failure into the push.
-3. Push: `git push -u origin <current-branch>`.
+4. Push: `git push -u origin <current-branch>`.
    - If the pre-push hook fails, the push is rejected and nothing lands on
      origin — fix, commit, push again.
-4. Open the PR with `gh pr create` (see format below).
-5. **Optionally request a Copilot review** (separate step, after the PR
+5. Open the PR with `gh pr create` (see format below).
+6. **Optionally request a Copilot review** (separate step, after the PR
    exists), if the team uses it:
    `gh pr edit <PR-URL> --add-reviewer Copilot`.
    - If `Copilot` doesn't resolve as a handle, fall back to
@@ -48,8 +58,8 @@ Push the current branch and open a PR in the repo you're in.
    - If the request fails: warn the user and continue — the PR is already
      created; don't retry, don't block. Fire-and-forget: never wait for
      Copilot's review to land.
-6. Report the PR URL.
-7. **If the branch was pushed from a git worktree**, remove that worktree now
+7. Report the PR URL.
+8. **If the branch was pushed from a git worktree**, remove that worktree now
    (`git worktree remove <path>`) so the branch is free to check out manually
    later. Detect via `git worktree list` / the current path under
    `.claude/worktrees/`. The branch is safe on origin; only remove a clean
@@ -78,6 +88,8 @@ gh pr create --base <BASE> --head <BRANCH> \
 ## Rules
 
 - Base branch: **always ask**, never guess.
+- Run the formatter on the changed files **before** pushing. A repo that skips
+  lint or typecheck by policy does not thereby skip formatting.
 - No ticket → ask for the link, or draft one for approval; never file a ticket
   without the user approving its content.
 - Never add a `Co-Authored-By` line or AI-attribution footer anywhere.

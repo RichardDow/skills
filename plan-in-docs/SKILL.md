@@ -23,6 +23,7 @@ One plan = one markdown file under `docs/plans/<creation-date>/`, grouped by day
 title: Fix webhook GC thrash
 date: 2026-07-06
 status: draft
+estimate: 4.5h
 slack: https://example.slack.com/archives/C0000000/p1234567890
 jira: https://example.atlassian.net/browse/PROJ-1234
 ---
@@ -53,6 +54,8 @@ What could go wrong and the fallback.
 - **Link frontmatter (flat labelled keys).** Capture reference URLs — Slack threads, tickets, PRs, dashboards — as **flat frontmatter keys named after the link** (`slack:`, `jira:`, `pr:`, `figma:`), one URL per key. Obsidian renders these as clean clickable properties; a `links:` list-of-objects renders as raw JSON and is broken, so avoid it. Use a `2` suffix if you genuinely need two of a kind (`pr: …`, `pr2: …`). Omit any key with no link. A link may still *also* appear inline in `Context`/see-also when the sentence is genuinely about that thing — frontmatter is the index, prose is the argument.
 
 4. **Graduated from an idea?** If the repo keeps an ideas dir (e.g. `docs/ideas/`) and the plan grew out of one, cross-link both ways: plan's `Context` links the idea file, and the idea gets a `plan: <relative path>` frontmatter field plus a one-line note in its body pointing at the plan.
+
+5. **Estimate (implementation plans only).** The plan doc is the source of truth for the ticket's Original Estimate — set it here, before the work starts. Derive it with the [estimate](../estimate/SKILL.md) skill, which owns the rules: agents write the code, so the forecast splits into agent execution, human review, and a rework buffer, and the human half is derived from a `## Manual verification` section the plan must carry. Record the summed figure as an `estimate:` frontmatter key, an `Nh` string at 0.5h granularity; keep the split and its reasoning in the plan body. A multi-ticket plan omits the frontmatter key and gives each ticket its own figure in `Steps`. Whatever files the ticket reads the value once, write-once — it should not change after filing. Skip this step for non-implementation plans.
 
 ## Lifecycle
 
