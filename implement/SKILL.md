@@ -49,9 +49,55 @@ Use /tdd where possible, at pre-agreed seams.
 
 Run typechecking regularly, single test files regularly, and the full test suite once at the end.
 
-Once done, use /review to review the work.
+Commit your work to the feature branch created above once the tests are green.
 
-Commit your work to the feature branch created above.
+## Review–fix loop
+
+<!-- CLAUDE-SPECIFIC: this loop spawns a reviewer via the Claude Code Agent tool.
+     Another agent needs its own version using its own subagent mechanism. A
+     one-shot /review is the fallback if yours has none. -->
+
+Once the work is committed and green, run a review–fix loop rather than a one-shot
+`/review`. You are the **author**. Each round spawns a **separate read-only reviewer
+subagent** to critique the diff. The reviewer never edits code — it reports, you
+edit. Use a different model for the reviewer if you can: an author reviewing its own
+diff mostly re-reads its own reasoning.
+
+**Each round:**
+
+1. Spawn the reviewer over the branch diff. It returns a structured list of
+   findings, each `{ file, line, severity, category, action, fix_instruction,
+   escalation_reason }`, applying this decision rule for `action`:
+   - **escalate** if the finding is a product or behaviour decision, an
+     architectural choice with more than one defensible answer, a change to a
+     public contract / API / DB schema, or anything it is under ~80% sure about.
+   - **fix** only for correctness bugs, missing or weak tests, and mechanical
+     issues with one obvious right answer.
+2. Apply every `fix`: make the change, re-run the touched tests, then re-run the
+   **full** suite before the round's commit — a fix can regress an untouched test.
+   The loop's invariant is that **every committed round is green**. If a fix breaks
+   tests and you cannot resolve it in the same round, do not commit it red. Convert
+   that finding to an escalation instead.
+3. Append every `escalate` to the review queue file (see below).
+4. **If you disagree with a `fix_instruction`, do not silently override it.** Do not
+   apply it. Convert it to an escalation: "the reviewer asked X, I think Y because…,
+   your call." Disagreement between author and reviewer is itself a signal worth
+   surfacing.
+5. Commit the round's fixes, then review again.
+
+**Terminate** when any of these fires first: **converged** (a round yields zero
+`fix` findings), **iteration cap** (5 rounds), or **no progress** (a round's
+findings match the previous round's — auto-escalate the stuck finding). On exit,
+write a terminal status line at the top of the review queue: `CONVERGED`,
+`HIT_ITERATION_CAP (N rounds, M escalations)`, or `STUCK on <finding>`.
+
+**The review queue** is a markdown file written *outside* the working tree — a
+sibling of it, e.g. `../<dirname>-REVIEW-QUEUE.md`. Outside means it can never be
+`git add`-ed into a commit and needs no ignore entry, and it survives an agent
+restart. When committing, add only the files you actually changed — **never
+`git add -A` or `git add .`**. Format: a header (terminal status, counts, the
+author and reviewer models, last-commit sha), then one `## ` section per escalation
+carrying the reviewer's reason and any author disagreement.
 
 ## Comments — propose as candidates, never sprinkle
 
