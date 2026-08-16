@@ -57,8 +57,17 @@ the producer side; `axios.<verb>`, `fetch(`, `useQuery`, `useMutation`,
 illustrations, not the definition — on an unfamiliar stack, read the surrounding
 code and work out its equivalents before concluding there is no boundary here.
 
+**Tests are a signal too.** A changed fixture or expected payload that disagrees
+with a changed type or schema is drift, and it often surfaces there first —
+someone updates the assertion to make the suite pass without touching the other
+side of the contract.
+
 A changed file with none of these signals is usually not boundary-relevant. Note
 it and move on.
+
+**Skip generated files.** Build output, lockfiles and generated clients or type
+declarations carry exactly the consumer signals above, in volume, and none of it
+is authored. Drift in a generated file is a symptom of drift in its source.
 
 ## Cross-checking — find the counterpart
 
@@ -74,6 +83,18 @@ are the same route.
 
 **Fallback: name-based matching.** Search for the type name or a distinctive key.
 Lower confidence and prone to false hits; say so when you use it.
+
+**Check which revision of the counterpart you are reading.** A counterpart on the
+wrong branch produces confident wrong verdicts, which is worse than not running
+at all — it reports drift that does not exist, or misses drift that does. Before
+comparing, establish that the counterpart is on the branch that pairs with this
+change rather than on its default branch, and say which revision you compared
+against. Its uncommitted changes count: if the other side is dirty, that working
+tree is the contract, not its last commit.
+
+A counterpart may also be the only side that changed — the producer's work landed
+first and this diff is the consumer catching up, or the reverse. Read the
+counterpart's recent commits before concluding the two sides disagree.
 
 **Degrade honestly.** If the counterpart system is not readable from here — not
 checked out, not in scope, a third-party API — report the shape this side

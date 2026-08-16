@@ -49,9 +49,9 @@ Scan the diff for code that crosses a contract between two independently-deploye
 
 Run the axis if **either** side appears. Do not require both: the dangerous case is one-sided, where the producer renamed a field and every consumer is untouched and therefore absent from the diff. Requiring both sides means the check only fires once the problem is already visible.
 
-Skip the axis, silently, when no signal appears — a pure-UI or migration-only diff should not pay for a sub-agent.
+Skip the axis when no signal appears — a pure-UI or migration-only diff should not pay for a sub-agent. Don't announce the decision mid-flow; step 5 records it.
 
-Note which counterpart systems are readable from here. A cross-repo worktree set gives both sides; a single checkout may give only one, and the axis reports that rather than guessing.
+Note which counterpart systems are readable from here, and **which revision of each you are looking at**. A cross-repo worktree set gives both sides on paired branches; a single checkout may give only one, or one sitting on its default branch. A counterpart on the wrong branch yields confident wrong verdicts, so the axis needs to be told what it is comparing against rather than left to assume.
 
 ### 4. Spawn the sub-agents in parallel
 
@@ -74,7 +74,7 @@ If the spec is missing, skip the Spec sub-agent and note this in the final repor
 **Boundary sub-agent prompt** — include:
 
 - The diff command and commit list.
-- Which counterpart systems are readable, and where they are.
+- Which counterpart systems are readable, where they are, and which branch or revision each is on.
 - The contents of [boundary-checks.md](boundary-checks.md).
 - The brief: "Find every hunk that crosses a contract between independently-deployed systems, locate the counterpart on the other side whether or not it changed, and compare the shapes. Two severities only: definite mismatch (both sides inspected) and needs manual verification (state exactly what a human must check). If a counterpart system is not readable from here, say so rather than guessing — that is a finding, not a blank. Under 400 words."
 
