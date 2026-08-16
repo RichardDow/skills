@@ -1,18 +1,19 @@
 ---
 name: review
-description: Review the changes since a fixed point (commit, branch, tag, or merge-base) along two axes — Standards (does the code follow this repo's documented coding standards?) and Spec (does the code match what the originating issue/PRD asked for?). Runs both reviews in parallel sub-agents and reports them side by side. Use when the user wants to review a branch, a PR, work-in-progress changes, or asks to "review since X".
+description: Review the changes since a fixed point (commit, branch, tag, or merge-base) along up to three axes — Standards (does the code follow this repo's documented coding standards?), Spec (does the code match what the originating issue/PRD asked for?), and Boundary (does a change crossing a contract between two independently-deployed systems still agree with the other side?). Runs the reviews in parallel sub-agents and reports them side by side. Use when the user wants to review a branch, a PR, work-in-progress changes, says "I need a code review", or asks to "review since X".
 ---
 
 <!-- CLAUDE-SPECIFIC: this skill dispatches work via the Claude Code Agent tool and
      named subagents (general-purpose). Another agent needs its own version using
      its own parallel-subagent mechanism. -->
 
-Two-axis review of the diff between `HEAD` and a fixed point the user supplies:
+Review of the diff between `HEAD` and a fixed point the user supplies, along two standing axes and one conditional:
 
 - **Standards** — does the code conform to this repo's documented coding standards?
 - **Spec** — does the code faithfully implement the originating issue / PRD / spec?
+- **Boundary** — where the change crosses a contract between independently-deployed systems, does the other side still agree? Runs only when the diff touches boundary code (step 3.5).
 
-Both axes run as **parallel sub-agents** so they don't pollute each other's context, then this skill aggregates their findings.
+Each axis runs as a **parallel sub-agent** so they don't pollute each other's context, then this skill aggregates their findings.
 
 ## Process
 
@@ -42,9 +43,19 @@ Collect whichever of these the repo actually has — skip what's absent:
 
 If the repo documents no standards at all, the Standards sub-agent still runs, judging only against conventions visible in the surrounding code — and says so in its report.
 
-### 4. Spawn both sub-agents in parallel
+### 3.5 Decide whether the Boundary axis runs
 
-Send a single message with two `Agent` tool calls. Use the `general-purpose` subagent for both.
+Scan the diff for code that crosses a contract between two independently-deployed systems — a frontend and its API, two services, a client and its server, a job producer and its worker. [boundary-checks.md](boundary-checks.md) lists the producer and consumer signals to look for.
+
+Run the axis if **either** side appears. Do not require both: the dangerous case is one-sided, where the producer renamed a field and every consumer is untouched and therefore absent from the diff. Requiring both sides means the check only fires once the problem is already visible.
+
+Skip the axis when no signal appears — a pure-UI or migration-only diff should not pay for a sub-agent. Don't announce the decision mid-flow; step 5 records it.
+
+Note which counterpart systems are readable from here, and **which revision of each you are looking at**. A cross-repo worktree set gives both sides on paired branches; a single checkout may give only one, or one sitting on its default branch. A counterpart on the wrong branch yields confident wrong verdicts, so the axis needs to be told what it is comparing against rather than left to assume.
+
+### 4. Spawn the sub-agents in parallel
+
+Send a single message with one `Agent` tool call per axis that is running. Use the `general-purpose` subagent for all of them.
 
 **Standards sub-agent prompt** — include:
 
@@ -60,17 +71,25 @@ Send a single message with two `Agent` tool calls. Use the `general-purpose` sub
 
 If the spec is missing, skip the Spec sub-agent and note this in the final report.
 
+**Boundary sub-agent prompt** — include:
+
+- The diff command and commit list.
+- Which counterpart systems are readable, where they are, and which branch or revision each is on.
+- The contents of [boundary-checks.md](boundary-checks.md).
+- The brief: "Find every hunk that crosses a contract between independently-deployed systems, locate the counterpart on the other side whether or not it changed, and compare the shapes. Two severities only: definite mismatch (both sides inspected) and needs manual verification (state exactly what a human must check). If a counterpart system is not readable from here, say so rather than guessing — that is a finding, not a blank. Under 400 words."
+
 ### 5. Aggregate
 
-Present the two reports under `## Standards` and `## Spec` headings, verbatim or lightly cleaned. Do **not** merge or rerank findings — the two axes are deliberately separate (see _Why two axes_).
+Present each report under its own `## Standards`, `## Spec` and `## Boundary` heading, verbatim or lightly cleaned. Do **not** merge or rerank findings — the axes are deliberately separate (see _Why separate axes_).
 
-End with a one-line summary: total findings per axis, and the worst issue _within each axis_ (if any). Don't pick a single winner across axes — that's the reranking the separation exists to prevent.
+End with a one-line summary: total findings per axis, and the worst issue _within each axis_ (if any). Don't pick a single winner across axes — that's the reranking the separation exists to prevent. Say explicitly when the Boundary axis did not run.
 
-## Why two axes
+## Why separate axes
 
-A change can pass one axis and fail the other:
+A change can pass one axis and fail another:
 
 - Code that follows every standard but implements the wrong thing → **Standards pass, Spec fail.**
 - Code that does exactly what the issue asked but breaks the project's conventions → **Spec pass, Standards fail.**
+- Code that is clean, matches the spec, and disagrees with the other side of a contract → **both pass, Boundary fail.** This one compiles and ships, which is why it gets its own axis rather than a note inside Standards.
 
-Reporting them separately stops one axis from masking the other.
+Reporting them separately stops one axis from masking another.
