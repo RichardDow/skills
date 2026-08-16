@@ -3,9 +3,10 @@
 # Report where this repo's published skills differ from the working copies on
 # this machine. Reports only — it never copies, merges or edits anything.
 #
-# Some divergence is deliberate: the published copies use placeholders where the
-# working copies name a real tracker, host or internal process. The point is to
-# notice when a *generic* improvement lands locally and never gets ported back.
+# A published skill is the working copy, not a genericised twin of it: every skill
+# is written to name no employer, repo, tracker instance or home path, so the two
+# copies should be identical. Any divergence is drift to fix, in whichever
+# direction is correct — not a deliberate difference.
 #
 #   LOCAL_SKILLS=... LOCAL_STYLES=... ./scripts/check-drift.sh
 
