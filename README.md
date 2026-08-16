@@ -23,8 +23,9 @@ Six stages you invoke, and three skills the stages invoke for you (`/estimate` u
 **4. Implement** (`/implement`). Execution starts with git discipline: always ask which base branch to cut from, always fetch origin first, always ask whether to work in a worktree (so parallel work stays untouched). The build itself uses `/tdd` at pre-agreed seams. Three feedback loops run alongside the code:
 
    - *The plan stays true.* Steps get ticked as they land; divergences, deferred steps, and PR links are written back into the plan file. The plan is the source of truth, not a write-once doc.
-   - *Comments are proposed, never sprinkled.* Opaque spots are collected as candidates (`file:line` + exact text + why the code can't say it) and presented for approval. The expected outcome for clear code is an empty list.
+   - *A comment is a smell.* Rationale belongs in the commit message, the PR description, the review thread — searchable, dated, attached to the change that motivated it. A comment survives only where a constraint bites at the point of edit, for a reader who won't be reading git history. Nothing is collected for approval; the clarity pass owns this.
    - *Review runs as a loop, not a gate.* See `/review` below.
+   - *Two quality passes follow convergence*, in a fixed order: simplification first, then clarity — clarifying first means naming things that are about to be deleted. Each gets its own commit, because the clarity pass's output *is* a commit message.
 
 **5. Push & PR** (`/push-and-pr`). Base branch is always asked, never guessed. The ticket key is derived from the branch name. Two gates are pre-empted before the push, because a rejected push teaches you nothing a local run couldn't: the repo's formatter over the changed files (a CI format check rejects a single hand-wrapped line, and this is the step everyone remembers only afterwards), and the repo's typecheck. PR bodies follow one shape: ticket link first, then a short Why and What. Opening the PR is also the "in review" moment, so the effort is logged as a worklog on the ticket — two figures, the agent session and the human review of it, summed into one entry with the split in the comment, because that comment is what `/estimate calibrate` reads later. If the work happened in a worktree, it's cleaned up after the push — unless a batch run still owns it.
 
@@ -75,9 +76,9 @@ Note: `implement` sets `disable-model-invocation: true` — it only runs when yo
 
 These skills are opinionated. The load-bearing opinions:
 
-- **Ask, don't guess**, for anything with blast radius: base branches, worktrees, ticket creation, comment insertion.
+- **Ask, don't guess**, for anything with blast radius: base branches, worktrees, ticket creation, shared-state writes.
 - **Documents have lifecycles.** Plans move `draft → active → done/abandoned` and are updated as work lands, so the next session inherits reality rather than intentions.
-- **Separation of concerns in judgment.** Review's two axes stay separate; the reviewer that finds a problem is never the author that fixes it; comment candidates are judged by the human, not the model.
+- **Separation of concerns in judgment.** Review's two axes stay separate; the reviewer that finds a problem is never the author that fixes it; anything with more than one defensible answer is escalated to the human rather than decided by the model.
 - **Estimate the human, not the typing.** Code volume is close to free; review and discovery are not.
 - Placeholders like `PROJ-1234` and `https://<org>.atlassian.net` mark the spots to adapt to your tracker.
 
