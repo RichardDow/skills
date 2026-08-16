@@ -12,18 +12,37 @@ dates and records the effort-clock start.
 
 Run it the moment you begin `/implement`, not before.
 
-## Configure once
+## Why `implement` does not call this
 
-Record your tracker's field identifiers here, so the skill stops guessing:
+Two reasons, and the second one is the one people ask about.
 
+**`implement` is an attempt; this is the commitment.** An abandoned or exploratory
+run must not silently start a ticket and set a due date nobody agreed to. The
+Start-Date guard below cannot cover that — it only ever blocks the *second* write,
+never the first one you did not want.
+
+**Tracker writes stay on the trusted side.** An unattended or sandboxed runner
+should hold no credential that can write to the tracker — a read-only token is
+what makes an unsupervised run safe, and handing it a writable one to save a step
+gives that away. So a runner that batches tickets calls this skill on the host
+first, then launches the inner agent with `implement` alone. The same rule keeps
+the worklog write out of the sandbox.
+
+## Resolve the tracker at run time
+
+Discover these; never hardcode them.
+
+- **Site / cloud id.** Ask the tracker's API which sites are accessible. One site →
+  use it without asking.
+- **Project key.** Take it from the ticket key you were given (`PROJ-1234` → `PROJ`).
 - **Start Date field.** Not standard on Jira Cloud — it is usually a custom field
-  (`customfield_NNNNN`). Find its ID once via the field list API and write it down,
-  along with the date you verified it.
+  (`customfield_NNNNN`). Read it from the issue's field metadata. If the project's
+  agent config or project memory already records the id, use that and skip the
+  lookup.
 - **Due Date field.** Standard on Jira (`duedate`).
-- **Project key and site**, if your tracker's API needs them.
 
-Examples below use Jira, since `wrap-up-plan-in-docs` already assumes it. Any tracker
-with a start date, a due date and an estimate field works the same way.
+Examples below use Jira. Any tracker with a start date, a due date and an estimate
+field works the same way.
 
 ## Workflow
 
@@ -53,20 +72,24 @@ with a start date, a due date and an estimate field works the same way.
      console.log(d.toISOString().slice(0,10));' "$start" "$N"
    ```
 4. **Confirm, then write.** Show both dates and get a yes — these are shared-state
-   writes that other people see. Then set the Start Date and Due Date fields.
+   writes that other people see. Then set the Start Date and Due Date fields in one
+   edit.
 
    Never touch the Original Estimate here. It is write-once and owned by whatever
    filed the ticket.
-5. **Stamp the effort clock.** If a plan doc exists for this ticket under
-   `docs/plans/` (plan-in-docs), add a one-line `start-dev: <today>` note, so the
-   actual effort can be reported later against the forecast. No plan doc → skip.
+5. **Stamp the effort clock.** Find the plans directory: walk up from the working
+   directory for a `docs/plans/`, then fall back to a location recorded in project
+   memory, and ask only if neither answers. If a plan doc exists for this ticket,
+   add a one-line `start-dev: <today>` note, so the actual effort can be reported
+   later against the forecast. No plan doc → skip.
 6. **Report** the ticket key, the two dates, and that the effort clock started today.
 
 ## Rules
 
 - Start and Due are movable. Re-running is blocked by the Start-Date guard, but the
   user may edit either date by hand at any time afterwards.
-- Never write the Original Estimate. Never log time here.
+- Never write the Original Estimate. Never log time here — that belongs to the
+  push-and-PR step, which logs the worklog when the work goes to review.
 - One ticket per run.
 
 **See also:** where the estimate comes from — [estimate](../estimate/SKILL.md);
