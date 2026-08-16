@@ -1,6 +1,6 @@
 ---
 name: estimate
-description: Produce an Original Estimate for a piece of work on the assumption that agents write the code and humans only review it. Splits the forecast into agent execution, human review, and a rework buffer, and generates the manual-verification list that the human half is derived from. Use when the user says "/estimate", "estimate this", "estimate them", "how long will this take", "size these tickets", or when plan-in-docs or a ticket-filing step needs an `estimate:` value. Owns the 0.5h granularity and 1d ceiling rules that those steps defer to.
+description: Produce an Original Estimate for a piece of work on the assumption that agents write the code and humans only review it. Splits the forecast into agent execution, human review, and a rework buffer, and generates the manual-verification list that the human half is derived from. Use when the user says "/estimate", "estimate this", "estimate them", "how long will this take", "size these tickets", or when a planning or ticket-filing step needs an `estimate:` value. Owns the 0.5h granularity and 1d ceiling rules that those steps defer to. Also runs `/estimate calibrate`, which compares shipped tickets' logged actuals against their forecasts and reports which band drifted — use when the user says "calibrate the estimates", "are my estimates accurate", "how are the estimates tracking", or wants to move the agent/review/buffer bands on evidence.
 ---
 
 # Estimate
@@ -21,7 +21,7 @@ What actually costs time:
 
 - **Blocked-on-human decisions** — an ambiguity the agent cannot resolve alone stalls the ticket.
 
-- **Agent-unverifiable work** — visual output, prod data, external vendors, flaky harnesses.
+- **Agent-unverifiable work** — visual output, production data, external vendors, flaky harnesses.
 
 - **Environment friction** — a package not in the checkout, a service that must be running.
 
@@ -65,26 +65,30 @@ Then sum to the tracker's number: round up to **0.5h granularity** (`1h`, `1.5h`
 and suggest splitting. Flag, do not block. A ticket at 8h is roughly 2h of agent work
 against 6h of review, which is a ticket that wants to be two.
 
-Do not pad for the model itself being young. The 30m–2h band is unmeasured, and the
-fix is measurement, not a standing apology. If you log actuals, split them into agent
-session and review, then after five or ten tickets compare them against these
-forecasts and move the band.
+Do not pad for the model itself being young. The 30m–2h band starts unmeasured, and
+the fix is measurement, not a standing apology. Run `/estimate calibrate` (below)
+once five or ten tickets have shipped, and move the band on what it reports.
 
 ## What lands where
 
 The `estimate:` frontmatter key in the plan doc carries the **summed figure** only,
-as an `Nh` string. That is what the ticket-filing step writes to the tracker's
-original-estimate field, and the number any due-date rule derives from. The
-agent/review/buffer split and its reasoning stay in the plan body so the number can
+as an `Nh` string — that is what the ticket-filing step writes to the tracker's
+original-estimate field, write-once, and the number any due-date rule derives from.
+A second key beside it, `estimate_split: agent <N>h / review <N>h / buffer <N>h`,
+carries the breakdown in a fixed shape so `calibrate` can read it without opening
+plan bodies. The reasoning behind each figure stays in the body, so the number can
 be argued with later.
+
+Every sub-8h estimate resolves to "due today" under the pickup rule
+`max(0, ceil(estimateDays) - 1)`, exactly as `0.5d` did.
 
 The manual-verification list is written once in the plan as a
 `## Manual verification` section, then copied into the ticket's acceptance criteria
-at filing. Copied, not linked — plan paths are internal notes and should not appear
-in the tracker.
+at filing. Copied, not linked — plan paths are internal notes and never appear in
+the tracker.
 
 For a multi-ticket plan, omit the plan-level `estimate:` key and give each ticket its
-own figure in the Steps list.
+own figure in the Steps list. The filing step then reads the per-ticket value.
 
 ## Worked example
 
@@ -101,6 +105,58 @@ manual-verification entries, so 1.5h. Three entries fires the rework trigger, so
 The 1.5d became 4.5h, and what survived is review, an environment flake, and one
 allowed round trip — not typing.
 
+## calibrate — move the bands on evidence
+
+```
+/estimate calibrate [last N tickets, default 10]
+```
+
+The forecast bands above are guesses until this runs. Run it after five or ten
+tickets ship, not per ticket.
+
+**Plan-driven, not ticket-driven.** Plans carry a `jira:` key; tickets carry no path
+back to their plan, because plan paths never appear in the tracker. So walk the
+plans tree — located the way [plan-in-docs](../plan-in-docs/SKILL.md) locates it,
+by walking up from the working directory — take each plan with a
+`jira:` and either an `estimate_split:` or a `## Time` table, and fetch those
+tickets' worklogs.
+
+1. **Collect.** Per plan: the forecast from `estimate_split:`, and the ticket's
+   worklogs from the tracker. Parse the first worklog's comment
+   (`agent <N>h / review <N>h`) into the two actuals, and any `rework <N>h` worklog
+   as a buffer actual. Skip tickets whose worklog has no comment in that shape —
+   they predate the convention. Report how many you skipped; never guess a split.
+
+   **A plan with a `## Time` table is multi-ticket:** `jira:` is a list, and each
+   row carries that ticket's own forecast. Take forecasts from the table — it
+   wins over `estimate_split:` when present — and one actual per ticket, still
+   from the tracker. Each source owns one thing: forecasts are made in the plan,
+   actuals are logged in the tracker, so the two cannot drift into disagreeing.
+   The table's own actual columns are the human's working copy and are never the
+   calibration input, so a transcription slip cannot become evidence.
+2. **Compare per band.** Agent against the 30m–2h band, review against the 0.5h
+   floor plus its manual-verification entries, buffer against the flat 1h.
+3. **Report** one row per ticket, then a verdict per band:
+
+   ```
+   PROJ-10041   forecast 1h/1.5h/0h    actual 0.5h/3h/—
+   PROJ-10044   forecast 1h/0.5h/1h    actual 1h/2h/1.5h
+
+   agent    band holding (30m–2h)
+   review   under-forecast on 2 of 2 — raise the floor above 0.5h
+   buffer   fired on 4 of 11, median 1.5h against 1h assumed
+   ```
+
+4. **Never edit a worklog, a ticket, or a plan from here.** Calibrate reads and
+   reports. Changing a band is a decision for the user, applied by editing this
+   skill.
+
+Three signals worth naming when they appear: a review band that misses in one
+direction every time is a floor problem, not noise; a buffer that fires on most
+tickets means the trigger conditions are too narrow rather than the 1h being wrong;
+and an agent band that only misses on tickets with environment friction means the
+friction, not the band, needs its own line.
+
 ## Rules
 
 - Never quote a range. One number, stated, with the split behind it.
@@ -110,6 +166,8 @@ allowed round trip — not typing.
 - An item that cannot be automatically tested belongs on the manual-verification list, not in the agent hours.
 
 - If a decision is unresolved, do not pad the estimate for it. Name it as a blocker and estimate the resolved path.
+
+- Never move a band from a single ticket. Calibrate reports; five or ten tickets argue.
 
 **See also:** where the number is recorded — [plan-in-docs](../plan-in-docs/SKILL.md);
 how it becomes a Due Date at pickup — [start-ticket](../start-ticket/SKILL.md).
