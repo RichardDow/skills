@@ -43,6 +43,18 @@ These three are called for you by the stage above them. Each also runs standalon
 
 Inside implement it runs as a loop rather than a gate. Each round spawns a separate read-only reviewer subagent — a different model where possible, since an author reviewing its own diff mostly re-reads its own reasoning. The reviewer classifies each finding as **fix** (correctness bugs, weak tests, one obvious right answer) or **escalate** (product decisions, architecture with more than one defensible answer, public contracts, anything it's under ~80% sure about). The author applies the fixes and queues the escalations in a file written *outside* the working tree, where it can't be committed by accident. Every committed round is green. The loop stops on convergence, five rounds, or two rounds with identical findings.
 
+## Beyond the loop
+
+Twenty more skills, independent of the six stages. Each runs standalone.
+
+**Understand a codebase.** `/document-module` builds the living documentation for one module — what it does, plus a registry of its open problems under stable IDs. `/module-inventory` carves a codebase into the module list those docs are written against. `/docs-sweep` finds which of those docs have gone stale as the code moved. `/grill-codebase` answers questions about a module, grounded in the docs first and verified against the code. `/convention` captures a rule or a gotcha into the repo's own spec folder, so it outlives the person who knows it.
+
+**Decide what to build.** `/grill-with-docs` stress-tests a plan against the project's existing domain language. `/design-an-interface` generates several deliberately different shapes for the same module and compares them. `/technical-proposal` drafts the case for a change as a linked document set. `/request-refactor-plan` breaks a refactor into commits small enough to land safely. `/triage` sorts a pile of incoming work. `/improve-codebase-architecture` looks for the structural change worth making.
+
+**When something breaks.** `/diagnosing-bugs` runs a hypothesis loop over a hard bug or a performance regression. `/document-investigation` turns that session into a durable record — including the hypotheses that were killed, and evidence queries you can re-run. `/incident-report` interviews you section by section and produces a blameless post-mortem.
+
+**Everything else.** `/clarify` makes changed code self-explanatory by structure and deletes the comments that structure makes redundant. `/idea` captures a raw idea in one file, with a lifecycle and a graveyard instead of deletion. `/create-jira-task` files a ticket in your team's template. `/write-a-skill` authors and edits skills, and holds the portability rules this repo is written to. `/caveman` compresses the agent's replies to roughly a quarter of the tokens without losing technical accuracy. `/learning-mode` inverts the contract: the agent coaches with clues and doc pointers, and you write the code.
+
 ## Output style
 
 **Plain Technical English** — prose rules adapted from [ASD-STE100 Simplified Technical English](https://www.asd-ste100.org/), the controlled language aerospace uses so a maintenance instruction cannot be misread. One word for one meaning, active voice, short sentences, conclusion first, no hype or filler. Accuracy outranks brevity: it never drops a fact, a number or a scope qualifier to shorten a sentence, and it leaves code, commands and error messages verbatim.
