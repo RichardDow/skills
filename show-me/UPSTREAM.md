@@ -1,42 +1,20 @@
-# Upstream
+# Differences from upstream
 
 This skill is a fork of `show-me` from
 [humanlayer/skills](https://github.com/humanlayer/skills)
-(`plugins/show-me/skills/show-me/SKILL.md`), kept here for reference. `SKILL.md`
-and `FORMS.md` are the current, actively maintained version — this file is not.
+(`plugins/show-me/skills/show-me/SKILL.md`). What changed since the fork:
 
-```markdown
-# show-me
+| | upstream | this fork |
+|---|---|---|
+| length | ~30 lines, one file | `SKILL.md` (pointer) + `FORMS.md` (the vocabulary) |
+| notation | mermaid-first | ASCII fenced, 72 cols, on terminal and working documents; mermaid reserved for share-out artifacts only |
+| forms | prose list of 8 categories | concrete syntax per form: box-drawing tables, ER/state-machine notation, sequence lanes, pseudocode boxes |
+| picking a form | "pick the smallest view" (judgment call) | a table mapping what the change touches to a target-state form and a delta form |
+| deltas | "highlight changes" (general) | a diff convention per form: component diff, file-tree diff, call-tree diff, control-flow diff, today/tomorrow for a cross-service path |
+| pseudocode | "show algorithms as plain-text steps" | doc comment per method, body elided except a `calls:` line, before/after boxing for a changed method, rule for when a class earns its own box |
+| reuse | standalone | cited as the shared vocabulary by `grill-me` and `plan-in-docs`, instead of each restating it |
 
-**Purpose:** A visual communication guide for Claude Code—help users grasp concepts through minimal, focused diagrams rather than lengthy text.
-
-**Core principle:** "Skip the preamble and keep prose brief. Pick the smallest view that makes the key point clear."
-
-## Visual Formats
-
-**Pseudocode/Logic** — Show algorithms as plain-text steps
-
-**Call Trees** — Display runtime flow and function relationships
-
-**Component Trees** — Map UI structure with state and module ownership
-
-**File Trees** — Illustrate codebase organization and responsibility
-
-**Mermaid Diagrams** — Render sequence flows, dependencies, and interactions
-
-**Diffs** — Highlight changes while preserving context (components, files, control flow, state)
-
-**Full Code Blocks** — Show complete implementations when mostly new or when context matters for ownership
-
-**HTML Artifacts** — Build focused infographics for dense visual concepts (layouts, state comparisons, UI variations)
-
-## Key Constraints
-
-- Match product aesthetics (colors, typography, spacing)
-- Include only essential details for the current question
-- Avoid overwhelming with too many visuals
-- Use real labels and data when possible
-- Ensure mobile and desktop support for HTML outputs
-
-**Result:** Users grasp architecture, logic, and change impact at a glance.
-```
+Upstream states principles ("pick the smallest view," "match product aesthetics").
+This fork also states mechanics — exact column widths, when a diff outranks a
+full block, when a heading is needed and when it isn't — so two different
+sessions draw the same change the same way.
