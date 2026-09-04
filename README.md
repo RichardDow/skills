@@ -53,7 +53,7 @@ Twenty more skills, independent of the six stages. Each runs standalone.
 
 **When something breaks.** `/diagnosing-bugs` runs a hypothesis loop over a hard bug or a performance regression. `/document-investigation` turns that session into a durable record — including the hypotheses that were killed, and evidence queries you can re-run. `/incident-report` interviews you section by section and produces a blameless post-mortem.
 
-**Everything else.** `/clarify` makes changed code self-explanatory by structure and deletes the comments that structure makes redundant. `/idea` captures a raw idea in one file, with a lifecycle and a graveyard instead of deletion. `/create-jira-task` files a ticket in your team's template. `/write-a-skill` authors and edits skills, and holds the portability rules this repo is written to. `/caveman` compresses the agent's replies to roughly a quarter of the tokens without losing technical accuracy. `/learning-mode` inverts the contract: the agent coaches with clues and doc pointers, and you write the code.
+**Everything else.** `/clarify` makes changed code self-explanatory by structure and deletes the comments that structure makes redundant. `/idea` captures a raw idea in one file, with a lifecycle and a graveyard instead of deletion. `/create-jira-task` files a ticket in your team's template. `/write-a-skill` authors and edits skills, and holds the portability rules this repo is written to. `/caveman` compresses the agent's replies to roughly a quarter of the tokens without losing technical accuracy. `/learning-mode` inverts the contract: the agent coaches with clues and doc pointers, and you write the code. `/show-me` draws the diagram vocabulary — file trees, call trees, sequences, before/after blocks — that grill-me and plan-in-docs cite rather than reinvent.
 
 ## Output style
 
@@ -109,6 +109,7 @@ Some divergence is the point. The script exists to catch the other kind: a genui
 ## Attribution
 
 - `grill-me`, `tdd`, `review`, and `implement` are adapted from [Matt Pocock's skills collection](https://github.com/mattpocock/skills) (MIT) — `implement` extends Matt's core with branch/worktree discipline, the review–fix loop, comment candidates, and plan sync.
+- `show-me` is adapted from [humanlayer/skills](https://github.com/humanlayer/skills) (MIT).
 - `plan-in-docs`, `estimate`, `start-ticket`, `push-and-pr`, and `wrap-up-plan-in-docs` are original.
 
 ## License
