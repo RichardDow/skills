@@ -53,7 +53,7 @@ Twenty more skills, independent of the six stages. Each runs standalone.
 
 **When something breaks.** `/diagnosing-bugs` runs a hypothesis loop over a hard bug or a performance regression. `/document-investigation` turns that session into a durable record — including the hypotheses that were killed, and evidence queries you can re-run. `/incident-report` interviews you section by section and produces a blameless post-mortem.
 
-**Everything else.** `/clarify` makes changed code self-explanatory by structure and deletes the comments that structure makes redundant. `/idea` captures a raw idea in one file, with a lifecycle and a graveyard instead of deletion. `/create-jira-task` files a ticket in your team's template. `/write-a-skill` authors and edits skills, and holds the portability rules this repo is written to. `/caveman` compresses the agent's replies to roughly a quarter of the tokens without losing technical accuracy. `/learning-mode` inverts the contract: the agent coaches with clues and doc pointers, and you write the code. `/show-me` draws the diagram vocabulary — file trees, call trees, sequences, before/after blocks — that grill-me and plan-in-docs cite rather than reinvent.
+**Everything else.** `/clarify` makes changed code self-explanatory by structure and deletes the comments that structure makes redundant. `/simplify` finds and applies what `/clarify` won't touch — reuse, simplification, efficiency, and mixed abstraction levels ("altitude") — and may change behavior where a fix is provably equivalent or the shift is named explicitly. `/idea` captures a raw idea in one file, with a lifecycle and a graveyard instead of deletion. `/create-jira-task` files a ticket in your team's template. `/write-a-skill` authors and edits skills, and holds the portability rules this repo is written to. `/caveman` compresses the agent's replies to roughly a quarter of the tokens without losing technical accuracy. `/learning-mode` inverts the contract: the agent coaches with clues and doc pointers, and you write the code. `/show-me` draws the diagram vocabulary — file trees, call trees, sequences, before/after blocks — that grill-me and plan-in-docs cite rather than reinvent.
 
 ## Output style
 
@@ -94,7 +94,7 @@ These skills are opinionated. The load-bearing opinions:
 - **Estimate the human, not the typing.** Code volume is close to free; review and discovery are not.
 - Placeholders like `PROJ-1234` and `https://<org>.atlassian.net` mark the spots to adapt to your tracker.
 
-Two skills — `review`, and the review–fix loop in `implement` — dispatch work to parallel subagents through the Claude Code Agent tool, and carry a `CLAUDE-SPECIFIC` comment saying so. On another agent, swap in its own subagent mechanism, or fall back to a single-pass review.
+Several skills — `review`, the review–fix loop in `implement`, `clarify`, `simplify`, and `improve-codebase-architecture` among them — dispatch work to parallel subagents through the Claude Code Agent tool, and carry a `CLAUDE-SPECIFIC` comment saying so. On another agent, swap in its own subagent mechanism, or fall back to a single-pass review.
 
 ## Adapting these
 
