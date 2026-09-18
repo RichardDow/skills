@@ -2,7 +2,6 @@
 name: implement
 description: Implement a piece of work based on a plan, PRD, or set of issues — branch from a confirmed base (optionally in a worktree), build with TDD, review, and keep the plan file in sync. Use when the user says "/implement", "implement this plan", "build this", or hands over a PRD/issue to execute.
 group: build-implement
-disable-model-invocation: true
 ---
 
 Implement the work described by the user in the plan, PRD, or issues.
