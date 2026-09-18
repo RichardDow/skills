@@ -1,6 +1,7 @@
 ---
 name: wrap-up-plan-in-docs
 description: Sweep docs/plans and sync each plan's lifecycle status with its Jira ticket — done tickets close plans (grilling any unticked steps first), cancelled tickets propose abandonment, in-flight tickets mark plans active. Use when the user says "/wrap-up-plan-in-docs", "wrap up the plans", "sweep the plans", or "sync plans with jira".
+group: ticket-lifecycle
 ---
 
 # wrap-up-plan-in-docs
@@ -11,8 +12,11 @@ reported, never guessed at.
 
 ## Scope
 
-- Default: every plan under `docs/plans/` whose `status:` is `draft` or `active`.
-  Terminal plans (`done`/`abandoned`) are never touched. Exclude `docs/plans/PAST/`.
+- Default: every plan under the resolved vault's `plans/` directory (resolve it the
+  way [plan-in-docs](../plan-in-docs/SKILL.md#location) does — a repo's own recorded
+  vault, never a `docs/plans/` folder found by searching its tree) whose `status:` is
+  `draft` or `active`. Terminal plans (`done`/`abandoned`) are never touched. Exclude
+  `plans/PAST/`.
 - `/wrap-up-plan-in-docs <plan>`: wrap up just that plan (path or slug).
 - No `jira:` key → one line in the report ("no ticket, can't sweep"); skip otherwise.
 - `jira2:`/further ticket keys: the **primary `jira:` decides**; fetch the others too
