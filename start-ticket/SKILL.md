@@ -1,6 +1,7 @@
 ---
 name: start-ticket
-description: Mark a ticket as started at pickup — set Start Date to today, set Due Date to today plus its Original Estimate in working days, and stamp the start-of-work day in its plan doc. Use when the user says "start ticket PROJ-1234", "/start-ticket", "I'm picking up PROJ-1234", or is about to begin implementing a ticket that was filed earlier with Start and Due left empty.
+description: Mark a ticket as started at pickup — set Start Date to today, set Due Date to today plus its Original Estimate in working days, transition it to In Progress, and stamp the start-of-work day in its plan doc. Use when the user says "start ticket PROJ-1234", "/start-ticket", "I'm picking up PROJ-1234", or is about to begin implementing a ticket that was filed earlier with Start and Due left empty.
+group: ticket-lifecycle
 ---
 
 # start-ticket
@@ -8,7 +9,7 @@ description: Mark a ticket as started at pickup — set Start Date to today, set
 The pickup hook. This flow files a ticket early with an Original Estimate only —
 Start Date and Due Date are left empty, so a ticket can sit in the backlog before
 anyone works it. This skill is the "I am starting now" moment: it fills those two
-dates and records the effort-clock start.
+dates, moves the ticket to In Progress, and records the effort-clock start.
 
 Run it the moment you begin `/implement`, not before.
 
@@ -40,6 +41,10 @@ Discover these; never hardcode them.
   agent config or project memory already records the id, use that and skip the
   lookup.
 - **Due Date field.** Standard on Jira (`duedate`).
+- **In Progress transition.** Look up the issue's available transitions via the
+  tracker's API and find the one whose target status name matches "in progress"
+  (case-insensitive). More than one match, or none → ask the user which transition
+  to use.
 
 Examples below use Jira. Any tracker with a start date, a due date and an estimate
 field works the same way.
@@ -50,10 +55,11 @@ field works the same way.
 /start-ticket PROJ-1234
 ```
 
-1. **Read the issue.** Fetch the ticket; take its Original Estimate and its current
-   Start Date.
+1. **Read the issue.** Fetch the ticket; take its Original Estimate, its current
+   Start Date, and its current status.
 2. **Guard.** If Start Date is already set, the ticket is already started. Print
-   `Start Date already <date>, not changing` and stop. Do not re-stamp.
+   `Start Date already <date>, not changing` and stop. Do not re-stamp, and do not
+   transition the status either.
 3. **Resolve the dates.**
    - Start Date = today.
    - Convert the estimate to days first. Jira returns `Nh` for anything under a day
@@ -71,18 +77,24 @@ field works the same way.
      while(n>0){d.setUTCDate(d.getUTCDate()+1);const g=d.getUTCDay();if(g!==0&&g!==6)n--;}
      console.log(d.toISOString().slice(0,10));' "$start" "$N"
    ```
-4. **Confirm, then write.** Show both dates and get a yes — these are shared-state
-   writes that other people see. Then set the Start Date and Due Date fields in one
-   edit.
+4. **Confirm, then write.** Show both dates and, if the ticket is not already In
+   Progress or further along, the status change too — these are shared-state
+   writes that other people see. Get a yes, then set the Start Date and Due Date
+   fields and fire the In Progress transition.
+
+   If the status is already In Progress or past it (e.g. In Review), skip the
+   transition — only move status forward, never backward. Still set the dates.
 
    Never touch the Original Estimate here. It is write-once and owned by whatever
    filed the ticket.
-5. **Stamp the effort clock.** Find the plans directory: walk up from the working
-   directory for a `docs/plans/`, then fall back to a location recorded in project
-   memory, and ask only if neither answers. If a plan doc exists for this ticket,
+5. **Stamp the effort clock.** Find the plans directory the way
+   [plan-in-docs](../plan-in-docs/SKILL.md#location) resolves it — the repo's vault as
+   recorded in project memory, never a `docs/plans/` folder found by searching the
+   repo's own tree. If a plan doc exists for this ticket,
    add a one-line `start-dev: <today>` note, so the actual effort can be reported
    later against the forecast. No plan doc → skip.
-6. **Report** the ticket key, the two dates, and that the effort clock started today.
+6. **Report** the ticket key, the two dates, the status transition (or that it was
+   skipped and why), and that the effort clock started today.
 
 ## Rules
 
@@ -90,6 +102,8 @@ field works the same way.
   user may edit either date by hand at any time afterwards.
 - Never write the Original Estimate. Never log time here — that belongs to the
   push-and-PR step, which logs the worklog when the work goes to review.
+- Only move status forward. Never transition a ticket backward to In Progress from
+  a later status.
 - One ticket per run.
 
 **See also:** where the estimate comes from — [estimate](../estimate/SKILL.md);

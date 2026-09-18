@@ -1,6 +1,7 @@
 ---
 name: estimate
-description: Produce an Original Estimate for a piece of work on the assumption that agents write the code and humans only review it. Splits the forecast into agent execution, human review, and a rework buffer, and generates the manual-verification list that the human half is derived from. Use when the user says "/estimate", "estimate this", "estimate them", "how long will this take", "size these tickets", or when a planning or ticket-filing step needs an `estimate:` value. Owns the 0.5h granularity and 1d ceiling rules that those steps defer to. Also runs `/estimate calibrate`, which compares shipped tickets' logged actuals against their forecasts and reports which band drifted — use when the user says "calibrate the estimates", "are my estimates accurate", "how are the estimates tracking", or wants to move the agent/review/buffer bands on evidence.
+description: Produce an Original Estimate for a piece of work on the assumption that agents write the code and humans only review it. Splits the forecast into agent execution, human review, and a rework buffer, and generates the manual acceptance-criteria entries the human half is derived from (the ticket's Acceptance Criteria list also carries automated conditions, authored elsewhere — this skill owns only the manual ones). Use when the user says "/estimate", "estimate this", "estimate them", "how long will this take", "size these tickets", or when a planning or ticket-filing step needs an `estimate:` value. Owns the 0.5h granularity and 1d ceiling rules that those steps defer to. Also runs `/estimate calibrate`, which compares shipped tickets' logged actuals against their forecasts and reports which band drifted — use when the user says "calibrate the estimates", "are my estimates accurate", "how are the estimates tracking", or wants to move the agent/review/buffer bands on evidence.
+group: ticket-lifecycle
 ---
 
 # Estimate
@@ -39,19 +40,22 @@ prices above 2h of agent time is usually a discovery problem or a blocked decisi
 wearing an execution costume — say which, or split it.
 
 **Human review** — the user's own time, in hours. Start at 0.5h and add for blast
-radius, irreversibility, and every item on the manual-verification list.
+radius, irreversibility, and every manual acceptance-criteria entry.
 
-**Manual verification list** — every check a human must make because an agent
-cannot. This is not a nice-to-have: it is what the human-review number is derived
-from, so an empty list means a 0.5h review. Each entry names the check and why an
-agent cannot do it.
+**Manual acceptance-criteria entries** — every check a human must make because an
+agent cannot. These are entries in the ticket's Acceptance Criteria list, not a
+separate list of their own — that list also carries automated conditions
+(distilled from the plan's `## Decisions` at plan-writing time, not this skill's
+job), but only the manual entries feed anything here: an empty count means a
+0.5h review, however many automated conditions sit alongside them. Each manual
+entry names the check and why an agent cannot do it.
 
 **Rework buffer** — add **1h** (0.5h agent, 0.5h review) when any of these is true,
 and nothing at all otherwise:
 
 - the change touches code that more than one shipped surface depends on
 
-- the ticket carries three or more manual-verification entries
+- the ticket carries three or more manual acceptance-criteria entries
 
 - the ticket spans repos, or needs a coordinated deploy
 
@@ -82,10 +86,13 @@ be argued with later.
 Every sub-8h estimate resolves to "due today" under the pickup rule
 `max(0, ceil(estimateDays) - 1)`, exactly as `0.5d` did.
 
-The manual-verification list is written once in the plan as a
-`## Manual verification` section, then copied into the ticket's acceptance criteria
-at filing. Copied, not linked — plan paths are internal notes and never appear in
-the tracker.
+The manual acceptance-criteria entries are written once in the plan, into its
+`## Acceptance Criteria` section (alongside the automated conditions
+distilled from `## Decisions` — this skill adds only the manual ones, after
+them, in the order the section already establishes), then the whole section
+is copied verbatim into the ticket's Acceptance Criteria field at filing.
+Copied, not linked — plan paths are internal notes and never appear in the
+tracker.
 
 For a multi-ticket plan, omit the plan-level `estimate:` key and give each ticket its
 own figure in the Steps list. The filing step then reads the per-ticket value.
@@ -99,7 +106,7 @@ the test, and both wirings in one session — 1h, and it is closely modelled on 
 existing component, so there is little discovery. Environment friction adds another
 hour: the component-workshop package is not in this checkout and has to be cloned and
 installed. Review is one diff across two screens behind a feature flag, plus three
-manual-verification entries, so 1.5h. Three entries fires the rework trigger, so add
+manual acceptance-criteria entries, so 1.5h. Three entries fires the rework trigger, so add
 1h. Total **4.5h**.
 
 The 1.5d became 4.5h, and what survived is review, an environment flake, and one
@@ -121,21 +128,24 @@ by walking up from the working directory — take each plan with a
 `jira:` and either an `estimate_split:` or a `## Time` table, and fetch those
 tickets' worklogs.
 
-1. **Collect.** Per plan: the forecast from `estimate_split:`, and the ticket's
-   worklogs from the tracker. Parse the first worklog's comment
-   (`agent <N>h / review <N>h`) into the two actuals, and any `rework <N>h` worklog
-   as a buffer actual. Skip tickets whose worklog has no comment in that shape —
-   they predate the convention. Report how many you skipped; never guess a split.
+1. **Collect.** Per plan: the ticket's worklogs from the tracker, always the
+   actuals source. Parse the first worklog's comment (`agent <N>h / review <N>h`)
+   into the two actuals, and any `rework <N>h` worklog as a buffer actual. Skip
+   tickets whose worklog has no comment in that shape — they predate the
+   convention. Report how many you skipped; never guess a split.
 
-   **A plan with a `## Time` table is multi-ticket:** `jira:` is a list, and each
-   row carries that ticket's own forecast. Take forecasts from the table — it
-   wins over `estimate_split:` when present — and one actual per ticket, still
-   from the tracker. Each source owns one thing: forecasts are made in the plan,
-   actuals are logged in the tracker, so the two cannot drift into disagreeing.
-   The table's own actual columns are the human's working copy and are never the
-   calibration input, so a transcription slip cannot become evidence.
+   The forecast comes from the plan's `## Time` table row when the plan has one
+   — it wins over `estimate_split:` when present — otherwise from
+   `estimate_split:` directly (older plans predating the table). A `jira:` list
+   means multi-ticket: each row carries that ticket's own forecast, one actual per
+   ticket, still from the tracker. Table-or-not is now independent of ticket
+   count — single-ticket plans carry a one-row table too. Each source owns one
+   thing: forecasts are made in the plan, actuals are logged in the tracker, so
+   the two cannot drift into disagreeing. The table's own actual columns are the
+   human's working copy and are never the calibration input, so a transcription
+   slip cannot become evidence.
 2. **Compare per band.** Agent against the 30m–2h band, review against the 0.5h
-   floor plus its manual-verification entries, buffer against the flat 1h.
+   floor plus its manual acceptance-criteria entries, buffer against the flat 1h.
 3. **Report** one row per ticket, then a verdict per band:
 
    ```
@@ -163,7 +173,7 @@ friction, not the band, needs its own line.
 
 - Never price test-writing separately when the thing is automatically testable. Assume it is written.
 
-- An item that cannot be automatically tested belongs on the manual-verification list, not in the agent hours.
+- An item that cannot be automatically tested belongs among the manual acceptance-criteria entries, not in the agent hours.
 
 - If a decision is unresolved, do not pad the estimate for it. Name it as a blocker and estimate the resolved path.
 

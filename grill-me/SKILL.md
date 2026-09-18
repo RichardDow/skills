@@ -1,6 +1,7 @@
 ---
 name: grill-me
 description: Interview the user relentlessly about a plan or design until every branch is resolved or explicitly deferred. Use when user wants to stress-test a plan, get grilled on their design, or mentions "grill me".
+group: planning-design
 ---
 
 Interview me relentlessly about every aspect of this plan until every branch is resolved or explicitly deferred. Walk down each branch of the design tree, resolving dependencies between decisions one-by-one. For each question, provide your recommended answer with a confidence score.
@@ -9,6 +10,23 @@ Ask the questions one at a time, waiting for feedback on each question before co
 
 If a question can be answered by exploring the codebase, explore the codebase instead. Skip
 questions the conversation already answers.
+
+## Ground external claims before interrogating them
+
+A design under grill often carries claims from somewhere else — a linked review, a
+bot's comment, a spec, a teammate's summary. Before turning one into a question,
+verify it against its real source rather than taking the claim at face value: read
+the actual file, function, or record the claim is about, not just the report
+describing it.
+
+Label what the read found. **GROUNDED** — confirmed or corrected by an actual read,
+cited to what settled it. **UNVERIFIED** — still resting on the source's own
+say-so. Score and question both the same way, but never let an unverified claim
+read as settled fact in a recommendation — say plainly it hasn't been checked, and
+check it before it becomes load-bearing for a decision.
+
+A claim that turns out wrong on verification is itself a branch: interrogate the
+corrected version, not the original.
 
 ## Score every recommendation
 
@@ -44,6 +62,18 @@ approved drawing into that document character-for-character. The drawing is the
 reader's transcript of what was agreed, not a diagram authored afterwards to fill
 a section — which is why it is drawn here, while you can still be corrected, and
 not later.
+
+## Probe a reused system for side effects beyond its literal function
+
+When a design routes a new caller through an existing pipeline, module, or shared
+state (a task queue, an event bus, a class instance also used elsewhere), ask
+whether that pipeline does anything beyond the literal function the design is
+reusing it for — health/circuit-breaker state, metrics, a notification a
+downstream system fires. A pipeline built for one kind of caller can carry an
+assumption (every invocation is a real one) that a new, synthetic caller quietly
+violates. Ask this as its own question, scored like any other, rather than folding
+it into "does the reuse work" — reuse working and reuse being safe are different
+claims.
 
 ## Track the unresolved branches
 
