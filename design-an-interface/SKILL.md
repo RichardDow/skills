@@ -7,6 +7,9 @@ description: Generate multiple radically different interface designs for a modul
 
 Based on "Design It Twice" from "A Philosophy of Software Design": your first idea is unlikely to be the best. Generate multiple radically different designs, then compare.
 
+<!-- CLAUDE-SPECIFIC: this skill spawns 3+ subagents via the Claude Code Agent
+     tool. Another agent needs its own version using its own subagent mechanism. -->
+
 ## Workflow
 
 ### 1. Gather Requirements
