@@ -51,13 +51,13 @@ Inside implement it runs as a loop rather than a gate. Each round spawns a separ
 
 ## Beyond the loop
 
-Twenty more skills, independent of the loop and the five it calls. Each runs standalone.
+Fifteen more skills, independent of the loop and the five it calls. Each runs standalone.
 
-**Understand a codebase.** `/document-module` builds the living documentation for one module — what it does, plus a registry of its open problems under stable IDs. `/module-inventory` carves a codebase into the module list those docs are written against. `/docs-sweep` finds which of those docs have gone stale as the code moved. `/grill-codebase` answers questions about a module, grounded in the docs first and verified against the code. `/convention` captures a rule or a gotcha into the repo's own spec folder, so it outlives the person who knows it.
+**Understand a codebase.** `/document-module` builds the living documentation for one module — what it does, plus a registry of its open problems under stable IDs. `/module-inventory` carves a codebase into the module list those docs are written against. `/docs-sweep` finds which of those docs have gone stale as the code moved. `/convention` captures a rule or a gotcha into the repo's own spec folder, so it outlives the person who knows it.
 
-**Decide what to build.** `/grill-with-docs` stress-tests a plan against the project's existing domain language. `/design-an-interface` generates several deliberately different shapes for the same module and compares them. `/technical-proposal` drafts the case for a change as a linked document set. `/request-refactor-plan` breaks a refactor into commits small enough to land safely. `/triage` sorts a pile of incoming work. `/improve-codebase-architecture` looks for the structural change worth making.
+**Decide what to build.** `/design-an-interface` generates several deliberately different shapes for the same module and compares them. `/technical-proposal` drafts the case for a change as a linked document set. `/request-refactor-plan` breaks a refactor into commits small enough to land safely.
 
-**When something breaks.** `/diagnosing-bugs` runs a hypothesis loop over a hard bug or a performance regression. `/document-investigation` turns that session into a durable record — including the hypotheses that were killed, and evidence queries you can re-run. `/incident-report` interviews you section by section and produces a blameless post-mortem.
+**When something breaks.** `/document-investigation` records a debugging session as a durable investigation — including the hypotheses that were killed, and evidence queries you can re-run. `/incident-report` interviews you section by section and produces a blameless post-mortem.
 
 **Everything else.** `/idea` captures a raw idea in one file, with a lifecycle and a graveyard instead of deletion. `/create-jira-task` files a ticket in your team's template. `/write-a-skill` authors and edits skills, and holds the portability rules this repo is written to. `/caveman` compresses the agent's replies to roughly a quarter of the tokens without losing technical accuracy. `/learning-mode` inverts the contract: the agent coaches with clues and doc pointers, and you write the code. `/show-me` draws the diagram vocabulary — file trees, call trees, sequences, before/after blocks — that grill-me and plan-in-docs cite rather than reinvent.
 
@@ -100,7 +100,7 @@ These skills are opinionated. The load-bearing opinions:
 - **Estimate the human, not the typing.** Code volume is close to free; review and discovery are not.
 - Placeholders like `PROJ-1234` and `https://<org>.atlassian.net` mark the spots to adapt to your tracker.
 
-Several skills — `review`, the review–fix loop in `implement`, `clarify`, `simplify`, and `improve-codebase-architecture` among them — dispatch work to parallel subagents through the Claude Code Agent tool, and carry a `CLAUDE-SPECIFIC` comment saying so. On another agent, swap in its own subagent mechanism, or fall back to a single-pass review.
+Several skills — `review`, the review–fix loop in `implement`, `clarify`, and `simplify` among them — dispatch work to parallel subagents through the Claude Code Agent tool, and carry a `CLAUDE-SPECIFIC` comment saying so. On another agent, swap in its own subagent mechanism, or fall back to a single-pass review.
 
 ## Adapting these
 

@@ -146,6 +146,6 @@ Do not reopen a settled branch. Do not suggest a next skill. Do not write the le
 `plan-in-docs` owns durable plan documents.
 
 This section applies to standalone grilling only. A skill that reads this file and ends by
-producing a document — `plan-in-docs`, `technical-proposal`, `grill-with-docs` — inherits the
+producing a document — `plan-in-docs`, `technical-proposal` — inherits the
 method and not the marker. Its document is its finish signal. A skill that never opens this file
 inherits nothing from it and is not listed here.

@@ -16,7 +16,7 @@ LOCAL_SKILLS="${LOCAL_SKILLS:-$HOME/.agents/skills}"
 LOCAL_STYLES="${LOCAL_STYLES:-$HOME/.claude/output-styles}"
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-md_lines() { find "$1" -name '*.md' -exec cat {} + 2>/dev/null | wc -l; }
+md_lines() { find -L "$1" -name '*.md' -exec cat {} + 2>/dev/null | wc -l; }
 
 report() {
   local repo_dir=$1 local_dir=$2 name=$3
@@ -66,7 +66,7 @@ echo "        Precedence rule names no skill, the working copy names one."
 if [ -d "$LOCAL_SKILLS" ]; then
   local_only=$(comm -13 \
     <(find "$REPO" -maxdepth 2 -name SKILL.md -printf '%h\n' | xargs -r -n1 basename | sort) \
-    <(find "$LOCAL_SKILLS" -maxdepth 2 -name SKILL.md -printf '%h\n' | xargs -r -n1 basename | sort) \
+    <(find -L "$LOCAL_SKILLS" -maxdepth 2 -name SKILL.md -printf '%h\n' | xargs -r -n1 basename | sort) \
     | wc -l)
   echo
   printf '  %-12s %d skills on this machine are not published here\n' "local-only" "$local_only"
