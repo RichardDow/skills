@@ -23,23 +23,24 @@ Start-Date guard below cannot cover that — it only ever blocks the *second* wr
 never the first one you did not want.
 
 **Tracker writes stay on the trusted side.** An unattended or sandboxed runner
-should hold no credential that can write to the tracker — a read-only token is
-what makes an unsupervised run safe, and handing it a writable one to save a step
+should hold no credential that can write to the tracker. A read-only token is
+what makes an unsupervised run safe — handing it a writable one to save a step
 gives that away. So a runner that batches tickets calls this skill on the host
 first, then launches the inner agent with `implement` alone. The same rule keeps
 the worklog write out of the sandbox.
 
 ## Resolve the tracker at run time
 
-Discover these; never hardcode them.
+Read the Jira configuration file linked from the shared agent config (`JIRA.md`)
+first and use its verified site, cloud id, project key, and Start Date field. If a
+value is missing or rejected, resolve it through the tracker API and update `JIRA.md`.
 
-- **Site / cloud id.** Ask the tracker's API which sites are accessible. One site →
-  use it without asking.
-- **Project key.** Take it from the ticket key you were given (`PROJ-1234` → `PROJ`).
-- **Start Date field.** Not standard on Jira Cloud — it is usually a custom field
-  (`customfield_NNNNN`). Read it from the issue's field metadata. If the project's
-  agent config or project memory already records the id, use that and skip the
-  lookup.
+- **Site / cloud id.** If absent from the config, ask the tracker's API which sites
+  are accessible. One site → use it without asking.
+- **Project key.** If absent from the config, take it from the ticket key you were
+  given (`PROJ-1234` → `PROJ`).
+- **Start Date field.** If absent from the config, read it from the issue's field
+  metadata; it is usually a custom field (`customfield_NNNNN`).
 - **Due Date field.** Standard on Jira (`duedate`).
 - **In Progress transition.** Look up the issue's available transitions via the
   tracker's API and find the one whose target status name matches "in progress"
@@ -89,7 +90,7 @@ field works the same way.
    filed the ticket.
 5. **Stamp the effort clock.** Find the plans directory the way
    [plan-in-docs](../plan-in-docs/SKILL.md#location) resolves it — the repo's vault as
-   recorded in project memory, never a `docs/plans/` folder found by searching the
+   recorded in the user's shared repo map, never a `docs/plans/` folder found by searching the
    repo's own tree. If a plan doc exists for this ticket,
    add a one-line `start-dev: <today>` note, so the actual effort can be reported
    later against the forecast. No plan doc → skip.
