@@ -1,14 +1,12 @@
 ---
 name: design-an-interface
 description: Generate multiple radically different interface designs for a module using parallel sub-agents. Use when user wants to design an API, explore interface options, compare module shapes, or mentions "design it twice".
+group: planning-design
 ---
 
 # Design an Interface
 
 Based on "Design It Twice" from "A Philosophy of Software Design": your first idea is unlikely to be the best. Generate multiple radically different designs, then compare.
-
-<!-- CLAUDE-SPECIFIC: this skill spawns 3+ subagents via the Claude Code Agent
-     tool. Another agent needs its own version using its own subagent mechanism. -->
 
 ## Workflow
 
@@ -26,10 +24,23 @@ Ask: "What does this module need to do? Who will use it?"
 
 ### 2. Generate Designs (Parallel Sub-Agents)
 
-Spawn 3+ sub-agents simultaneously using Task tool. Each must produce a **radically different** approach.
+Spawn four sub-agents simultaneously, one per constraint below. Interface
+design is ideation, not code-facing judgement — name the model the
+governing agent-instructions file's model-split rule names for prose,
+thinking, and ideation.
+
+In Claude Code, use the Agent tool with the repo-declared subagent type for
+this design task. In Codex, use `collaboration.spawn_agent`, state the
+required role in each prompt, and name that same tier's model there.
+
+Each sub-agent must produce a **radically different** approach. Tell every
+fresh sub-agent to use caveman mode, and to pass that instruction to any
+sub-agents it spawns.
 
 ```
 Prompt template for each sub-agent:
+
+Use caveman mode. If you spawn further agents, tell them to use caveman mode too.
 
 Design an interface for: [module description]
 
@@ -68,7 +79,9 @@ After showing all designs, compare them on:
 - **Depth**: small interface hiding significant complexity (good) vs large interface with thin implementation (bad)
 - **Ease of correct use** vs **ease of misuse**
 
-Discuss trade-offs in prose, not tables. Highlight where designs diverge most.
+Render the comparison as a table — the five criteria above as columns, one row
+per design. Reserve prose for what the table can't carry: the caveat, the
+recommendation, and highlighting where designs diverge most.
 
 ### 5. Synthesize
 
@@ -91,7 +104,7 @@ From "A Philosophy of Software Design":
 
 ## Anti-Patterns
 
-- Don't let sub-agents produce similar designs - enforce radical difference
-- Don't skip comparison - the value is in contrast
-- Don't implement - this is purely about interface shape
-- Don't evaluate based on implementation effort
+- Don't let sub-agents produce similar designs. Enforce radical difference.
+- Don't skip comparison. The value is in contrast.
+- Don't implement. This is purely about interface shape.
+- Don't evaluate based on implementation effort.
