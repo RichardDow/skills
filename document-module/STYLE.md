@@ -17,7 +17,7 @@ never pay for either with detail loss (depth folds, it never dies).
   reasoning between them (a set of endpoints, files, ordered steps). The moment a bullet needs
   a *because / therefore / but*, it's a sentence in a paragraph. Bullets that do remain open
   with a **bold lead** naming the item, and carry a **blank line between items** (loose lists
-  scan faster — applies inside `[!details]-` folds too).
+  scan faster).
 
 - **A table earns its place** only when every cell is indexed by two dimensions *and* stays
   short — a word, a number, a symbol. The moment a cell wants 2–3 sentences, that content is

@@ -117,4 +117,3 @@ method(args): ReturnType   // what it'd expose
 5. **Terminology defined once, here.** Engineer jargon lives in this lens with a one-line definition at
    first use; strip it from the product/mode lens.
 6. **`preserves:` links up only.** Sub-parts link up to mode behaviours; mode parts never link down.
-</content>

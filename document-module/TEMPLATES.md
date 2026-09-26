@@ -1,6 +1,28 @@
 # File skeletons
 
-Delete guidance before writing. `✅` = verified from source (stamp the date).
+Delete guidance before writing. `✅` = verified from source — a bare marker, no inline date (it's a second timestamp that drifts).
+
+---
+
+## Frontmatter rules
+
+`index.md`'s frontmatter is the source of truth the cross-module sweep and the generated
+rollups (`STATUS.md`, `PROBLEMS.md`, `README.md`) read. Parts (`NN-slug.md`) don't need it — the
+door carries it for the whole module. A prose date is not enough. It is unqueryable and drifts
+silently.
+
+- **`fe-homes` and `be-homes` are exact globs**, resolvable by `git log -- <glob>`. This is the
+  staleness anchor — the sweep diffs `<verified-sha>..HEAD` over these paths. A prose home (as in
+  the early `MODULE_MAP.md`) does not work. Tighten to globs on build or recheck.
+- **`verified-fe` and `verified-be`** are stamped from each code repo's HEAD at the moment you
+  finish verifying — on build, recheck, or a sweep noise-bump. Never hand-edit either to a date.
+  **Stamp a stack's SHA only when you actually read that stack's bodies this pass.** Stamping
+  `verified-fe` without reading FE is the exact failure that leaves a BE-only half-doc wearing a
+  green timestamp. A module has `fe-homes` but you skipped FE this pass → leave `verified-fe`
+  stale and flag "FE unverified" (see [MODES.md](MODES.md)'s Recheck section). Same rule for
+  `verified-be`.
+- **`shape`** mirrors the diagnosed deep-dive shape, or `flat`. The sweep re-checks it.
+- **`adjacent`** is the slugs from the Scope Adjacent table, in machine form.
 
 ---
 
@@ -9,7 +31,7 @@ Delete guidance before writing. `✅` = verified from source (stamp the date).
 ```md
 ---
 module: <slug>
-shape: flat            # flat | subsystem | parallel-systems | pipeline | hub | dual-flow | layered
+shape: flat            # flat | subsystem | parallel-systems | pipeline | hub | dual-flow | layered | mode
 verified-fe: <sha>     # frontend repo HEAD at verify time; omit if no FE home
 verified-be: <sha>     # backend repo HEAD at verify time; omit if no BE home
 fe-homes:              # real path globs relative to the frontend repo's src/ (NOT prose)
@@ -21,34 +43,56 @@ adjacent: [<slug-a>, <slug-b>]   # feeds the generated system-map
 
 # <Area> module — index
 
-> Living doc of what <area> does + its open problems. ✅ = verified from code (<date>).
+> Living doc of what <area> does + its open problems. ✅ = verified from code.
 > Terminology → project `CONTEXT.md`. Problems → [problems.md](./problems.md).
 > Proposals against this module link problems by ID (`<area>#P#`).
 
 ## Scope
-- **Owns:** <the capability this module is the single source of truth for>
-- **Does NOT own:** <adjacent concerns> → see [[other-module]]
-- **Adjacent modules:** [[mod-a]] (what crosses the seam), [[mod-b]] (…)
+
+**Owns:**
+
+| Area | What |
+|---|---|
+| <capability> | <the single source of truth this module is for> |
+
+**Does NOT own:**
+
+| Concern | Owner |
+|---|---|
+| <adjacent concern> | [[other-module]] |
+
+**Adjacent:**
+
+| Module | Relationship |
+|---|---|
+| [[mod-a]] | <what crosses the seam> |
+| [[mod-b]] | <…> |
 
 ## What it does
 <2–5 sentences: the module's responsibility and boundary>
 
-## Behaviors
+## Behaviours
 <!-- observable behavior BEFORE mechanism; domain language; anchor each to its symbol.
-     see SKILL.md §Behaviors. DEFAULT = numbered bold-lead list; table only for a true matrix. -->
+     see SKILL.md §Behaviors. DEFAULT = one ### per behaviour; table only for a true matrix. -->
 
-<!-- (a) DEFAULT — numbered list, bold observable outcome, detail + symbol follow: -->
-1. **Listing returns only what you're allowed to see.** Filtered to shipments the caller's
-   `AppAbility` and party-scope both match. → `buildShipmentAuthConditions` ✅
-2. **CargoSync is hidden by default.** `byo=true` excluded unless `includeByo`. → `findAccessibleBy` ✅
+<!-- (a) DEFAULT — one `###` heading per behaviour, ≈3-6 word outcome phrase as the anchor,
+     prose body opens with the full outcome then given/when + mechanism, ends → `symbol` ✅: -->
+### Listing returns only what you're allowed to see
+Filtered to shipments the caller's `AppAbility` and party-scope both match.
+→ `buildShipmentAuthConditions` ✅
+
+### CargoSync is hidden by default
+`byo=true` excluded unless `includeByo`. → `findAccessibleBy` ✅
 
 <!-- (a2) CROSS-STACK FLOW — trigger → endpoint → BE → render, BOTH ends anchored, endpoint = seam
      (see SKILL.md §Behaviors, §FE surface). Use when the behavior IS a flow across the stack. -->
-3. **The user edits a shipment and sees the recomputed status.** `ShipmentEdit.vue` submits
-   `PATCH /shipments/:ref` → `updateShipment` whitelists+persists → the view re-renders derived
-   status. → `ShipmentEdit.vue` · `updateShipment` ✅
+### The user edits a shipment and sees the recomputed status
+`ShipmentEdit.vue` submits `PATCH /shipments/:ref` → `updateShipment` whitelists+persists →
+the view re-renders derived status. → `ShipmentEdit.vue` · `updateShipment` ✅
 
-<!-- (b) TABLE — ONLY when it's a genuine matrix (same axes crossed → different outcomes): -->
+<!-- (b) DECISION TABLE — only for a genuine matrix (same axes crossed → different outcomes),
+     as its own ### inside ## Behaviors: -->
+### Editable fields by caller and byo status
 | Given: caller | Given: byo | When update → Then editable fields | Symbol |
 |---|---|---|---|
 | ADMIN | any | all fields | `updateShipment` ✅ |
@@ -73,7 +117,7 @@ adjacent: [<slug-a>, <slug-b>]   # feeds the generated system-map
 
 ## Parts
 <!-- only once split -->
-- [[part-0-...]] — ...
+- [01-slug](./01-slug.md) — ...
 ```
 
 ---
@@ -117,6 +161,7 @@ adjacent: [<slug-a>, <slug-b>]   # feeds the generated system-map
 - `symbol@path` — <candidate problem, one line> *(signal: dead code / no coverage / …)*
 
 ## Solved
-### <area>-P0 · <title>
+### <area>-P0
+**<title>**
 - **status**: solved — <date>, via [../../proposals/<slug>/](../../proposals/<slug>/)
 ```
