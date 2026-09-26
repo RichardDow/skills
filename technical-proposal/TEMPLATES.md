@@ -8,6 +8,13 @@ comments before writing.
 ## SUMMARY.md
 
 ```md
+---
+title: <Topic>
+date: <YYYY-MM-DD>
+status: draft
+problems: [<area>#P#, ...]
+---
+
 # <Topic> — proposal summary
 
 > One-page overview. Detail lives in the linked docs:
@@ -54,7 +61,7 @@ Links to registered problems in the living doc — the source of truth:
 <what hurts, who it hurts, why it matters now>
 
 ## Current state
-<how it works today — concrete, cited `file:line` where load-bearing>
+<how it works today — concrete, cited by symbol where load-bearing>
 <evidence of the pain: metrics, incidents, cost, time>
 ```
 
@@ -136,7 +143,7 @@ Links to registered problems in the living doc — the source of truth:
 <links: tickets, docs, prior art, external sources>
 
 ## Fact-check / provenance
-<load-bearing claims → `file:line`; note any corrections made>
+<load-bearing claims → symbol citation; note any corrections made>
 
 ## Open questions
 <unresolved; blocking vs non-blocking>
