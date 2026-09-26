@@ -1,6 +1,7 @@
 ---
 name: docs-sweep
 description: Cross-module freshness + problem sweep over all module docs. Runs the stage-1 flag script (commits-behind per module from its verified sha + homes), then LLM-triages only the flagged modules — auto-bumping noise, proposing real drift for a human recheck. Also runs heuristic Detection (tier-1 markers always, tier-2 semantic opt-in) writing new candidates into the owning module's registry, and regenerates STATUS.md / PROBLEMS.md / README.md. Use when the user wants to check which docs are stale, sweep the docs, find drift across all modules, refresh the rollups, or before a batch of proposals. Per-module build/recheck/rebuild is document-module's job — this is the cross-module layer above it.
+group: module-docs
 ---
 
 # docs-sweep
@@ -36,18 +37,19 @@ actual diff (`git -C <repo> diff <verified-sha>..HEAD -- <homes>`). Classify the
 | **behavior drift** | a change hits an anchored given/when/then (guard added/removed, whitelist moved) | **propose** — name the behavior; recommend recheck |
 | **new candidate** | the diff introduces a Detection signal (new TODO, untested money/auth path) | add to the module's `## Candidates` (no `P#`), then note it |
 
-**Auto-apply is noise-only.** Everything else is *proposed*, never applied — landmark/behavior
-drift must go through `document-module`'s grill + `✅`-verification, not a blind rewrite. Bumping
-a `verified` sha on noise is safe (reversible, no content change); rewriting a behavior is not.
+**Auto-apply is noise-only.** Everything else is *proposed*, never applied. Landmark or behavior
+drift must go through `document-module`'s grill and `✅`-verification, not a blind rewrite.
+Bumping a `verified` sha on noise is safe — it's reversible, and changes no content. Rewriting a
+behavior is not.
 
 ## Heuristic Detection — surface NEW problems, not just drift
 
-Drift finds gaps on **existing** landmarks; Detection finds problems the docs never captured.
-All findings land in the **owning module's `## Candidates`** (routed by whose `homes` the file
-matches), **deduped** against existing candidates + registered `P#`, capped per module so the
-list stays signal. **Never auto-promote to `P#`** — a candidate carries no ID until the user
-grills it (per `document-module` §Detection). The sweep *feeds* the grill; it does not replace
-it.
+Drift finds gaps on **existing** landmarks. Detection finds problems the docs never captured.
+All findings land in the **owning module's `## Candidates`**, routed by whose `homes` the file
+matches. Each is deduped against existing candidates and registered `P#`s, and capped per module
+so the list stays signal. **Never auto-promote to `P#`** — a candidate carries no ID until the
+user grills it (per `document-module` §Detection). The sweep *feeds* the grill. It does not
+replace it.
 
 - **Tier 1 — marker grep** (always, in stage 1): `TODO`/`FIXME`/`HACK`/`XXX`/`@deprecated`
   across each module's homes. Cheap, exact.
@@ -74,8 +76,9 @@ The newcomer's entry point (not `MODULE_MAP.md`, which is the author inventory).
 1. **Domain spine** — *hand-written*, changes rarely: the freight lifecycle in one line
    (quote → booking → shipment → tracking → delivery → invoice) and which module owns each
    movement. The story. Never overwrite this layer on regen.
-2. **System-map** — *generated*: a mermaid graph built from every module's `adjacent`
-   frontmatter. Relationships, always fresh.
+2. **System-map** — *generated*: an ASCII graph built from every module's `adjacent`
+   frontmatter — mermaid renders as dead text for a zero-context reader (see
+   [show-me/FORMS.md](../show-me/FORMS.md)). Relationships, always fresh.
 3. **Status table** — *generated*: coverage + staleness + open-`P#` per module (from STATUS.md).
 
 ## Process
