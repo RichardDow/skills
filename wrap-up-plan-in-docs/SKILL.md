@@ -12,15 +12,24 @@ reported, never guessed at.
 
 ## Scope
 
-- Default: every plan under the resolved vault's `plans/` directory (resolve it the
-  way [plan-in-docs](../plan-in-docs/SKILL.md#location) does — a repo's own recorded
-  vault, never a `docs/plans/` folder found by searching its tree) whose `status:` is
-  `draft` or `active`. Terminal plans (`done`/`abandoned`) are never touched. Exclude
-  `plans/PAST/`.
+- Default: every plan under the resolved vault's `plans/` directory whose `status:`
+  is `draft` or `active`. Resolve the vault the way
+  [plan-in-docs](../plan-in-docs/SKILL.md#location) does — a repo's own recorded
+  vault, never a `docs/plans/` folder found by searching its tree. Terminal plans
+  (`done`/`abandoned`) are never touched. Exclude `plans/PAST/`.
 - `/wrap-up-plan-in-docs <plan>`: wrap up just that plan (path or slug).
 - No `jira:` key → one line in the report ("no ticket, can't sweep"); skip otherwise.
-- `jira2:`/further ticket keys: the **primary `jira:` decides**; fetch the others too
-  and show their statuses in the report for context.
+- `jira2:`/further ticket keys (a second, unrelated ticket the same plan references):
+  the **primary `jira:` decides**; fetch the others too and show their statuses in
+  the report for context.
+- **`jira:` itself is a list** (a multi-ticket plan, per plan-in-docs' own frontmatter
+  rule): fetch every ticket's status and map the plan's status from the combination —
+  every ticket `done` → `done` (run the unticked-steps grill below against the whole
+  plan's `## Steps`, same as a single-ticket `done`); every ticket `done` or
+  `abandoned`, with at least one `abandoned` → propose per the abandon flow below,
+  naming which ticket was cancelled; anything else with at least one ticket still in
+  flight → `active`. Show each ticket's own status as its own row in the report
+  (see Report) rather than collapsing them into one.
 
 ## Fetch
 
