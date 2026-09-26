@@ -1,9 +1,10 @@
 ---
 name: request-refactor-plan
 description: Create a detailed refactor plan with tiny commits via user interview, then file it as a GitHub issue. Use when user wants to plan a refactor, create a refactoring RFC, or break a refactor into safe incremental steps.
+group: planning-design
 ---
 
-This skill will be invoked when the user wants to create a refactor request. You should go through the steps below. You may skip steps if you don't consider them necessary.
+Use this skill when the user wants to create a refactor request. Go through the steps below. Skip a step only when it doesn't apply.
 
 1. Ask the user for a long, detailed description of the problem they want to solve and any potential ideas for solutions.
 
@@ -19,7 +20,7 @@ This skill will be invoked when the user wants to create a refactor request. You
 
 7. Break the implementation into a plan of tiny commits. Remember Martin Fowler's advice to "make each refactoring step as small as possible, so that you can always see the program working."
 
-8. Create a GitHub issue with the refactor plan. Use the following template for the issue description:
+8. Draft the refactor plan using the template below, and show it in full. Wait for an explicit yes before filing anything — creating a GitHub issue is a shared-state action, and a skill argument is never that approval. Once confirmed, create the GitHub issue with the approved content:
 
 <refactor-plan-template>
 
