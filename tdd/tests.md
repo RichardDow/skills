@@ -9,7 +9,7 @@
 test("user can checkout with valid cart", async () => {
   const cart = createCart();
   cart.add(product);
-  const result = await checkout(cart, paymentMethod);
+  const result = await checkout({ cart, paymentMethod });
   expect(result.status).toBe("confirmed");
 });
 ```

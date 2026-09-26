@@ -23,7 +23,7 @@ Pass external dependencies in rather than creating them internally:
 
 ```typescript
 // Easy to mock
-function processPayment(order, paymentClient) {
+function processPayment({ order, paymentClient }) {
   return paymentClient.charge(order.total);
 }
 

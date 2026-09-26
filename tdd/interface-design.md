@@ -6,7 +6,7 @@ Good interfaces make testing natural:
 
    ```typescript
    // Testable
-   function processOrder(order, paymentGateway) {}
+   function processOrder({ order, paymentGateway }) {}
 
    // Hard to test
    function processOrder(order) {
