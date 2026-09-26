@@ -1,13 +1,14 @@
 ---
 name: document-investigation
 description: Write a diagnosis session up as an investigation record in docs/investigations/ — symptom, hypotheses (including killed ones), re-runnable evidence queries, root cause, ranked fixes. Use when the user says "document this investigation", "write up the diagnosis", "record this debugging session", or wants a durable trail of a root-cause hunt that isn't a formal incident report.
+group: module-docs
 ---
 
 # Document Investigation
 
-Turn the current session's diagnosis work into a durable record at `docs/investigations/<YYYY-MM-DD>-<short-slug>.md`. Date = investigation start. Find `docs/` by walking up from the working directory — the nearest ancestor holding a `docs/` tree wins; fall back to a location recorded in the project's agent config. Create the `investigations/` directory if missing.
+Turn the current session's diagnosis work into a durable record at `<vault>/investigations/<YYYY-MM-DD>-<short-slug>.md`. Resolve `<vault>` the way [plan-in-docs](../plan-in-docs/SKILL.md#location) does — the recorded vault map, never a walk-up. The date is the investigation's start date. Create the `investigations/` directory if it's missing.
 
-Prose style: follow the `document-module` skill's `STYLE.md` (bullets-first, folded depth, subject-only inline links).
+Prose style: follow the `document-module` skill's `STYLE.md` (prose-first, depth kept inline — no folds, subject-only inline links).
 
 Unlike [[incident-report]] (facts gathered by interview), an investigation's evidence lives in the session context. **Auto-draft from the conversation, then confirm** — do not grill section-by-section.
 
@@ -66,4 +67,4 @@ Key UTC timestamps: symptom onset, deploys, restarts, episodes.
 - Queries must be copy-paste re-runnable — include log group, time bounds, and any non-obvious syntax fixes discovered along the way.
 - Keep the register factual and blameless; systems, not people.
 - Cross-link: if a formal incident report or Jira ticket exists or gets created later, add it to `links`.
-- Screenshots: only when the user asks to save them. Copy to `docs/investigations/assets/<doc-slug>/` with descriptive names and reference from the relevant section. Do this at the moment they're shared — the session image cache is ephemeral, and the desktop's own screenshot directory holds the originals as a fallback, matchable by timestamp.
+- Screenshots: only when the user asks to save them. Copy to `docs/investigations/assets/<doc-slug>/` with descriptive names, and reference them from the relevant section. Do this at the moment they're shared — the session image cache is ephemeral. The desktop's own screenshot directory holds the originals as a fallback, matchable by timestamp.
