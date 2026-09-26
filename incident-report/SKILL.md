@@ -1,6 +1,7 @@
 ---
 name: incident-report
 description: Produce a blameless incident report by interviewing the user section-by-section. Use when the user wants to write an incident report, post-mortem, or RCA, or mentions "incident report", "post-mortem", or "write up the incident".
+group: module-docs
 ---
 
 # Incident Report
@@ -17,7 +18,7 @@ Interview the user to gather details for each section, then produce a final repo
 
 4. **Stay blameless** — phrase contributing factors in terms of systems, signals, and processes, not individuals. If the user names a person, capture the action they took, not the person.
 
-5. **Write the report** to `docs/incidents/INCIDENT-<YYYY-MM-DD>-<short-slug>.md`. Find `docs/` by walking up from the working directory — the nearest ancestor holding a `docs/` tree wins; fall back to a location recorded in the project's agent config. Create the `incidents/` directory if missing. Confirm the filename with the user before writing.
+5. **Write the report** to `<vault>/incidents/<YYYY-MM-DD>-<short-slug>.md`. Resolve `<vault>` the way [plan-in-docs](../plan-in-docs/SKILL.md#location) does — the recorded vault map, never a walk-up. Create the `incidents/` directory if it's missing. Confirm the filename with the user before writing.
 
 ## Sections to gather
 
