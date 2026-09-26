@@ -15,8 +15,8 @@ questions the conversation already answers.
 
 A design under grill often carries claims from somewhere else — a linked review, a
 bot's comment, a spec, a teammate's summary. Before turning one into a question,
-verify it against its real source rather than taking the claim at face value: read
-the actual file, function, or record the claim is about, not just the report
+verify it against its real source. Don't take the claim at face value — read the
+actual file, function, or record the claim is about, not just the report
 describing it.
 
 Label what the read found. **GROUNDED** — confirmed or corrected by an actual read,
@@ -60,7 +60,7 @@ request at any point.
 A skill that borrows this method and ends by producing a document carries the
 approved drawing into that document character-for-character. The drawing is the
 reader's transcript of what was agreed, not a diagram authored afterwards to fill
-a section — which is why it is drawn here, while you can still be corrected, and
+a section. That is why it is drawn here, while you can still be corrected, and
 not later.
 
 ## Probe a reused system for side effects beyond its literal function
