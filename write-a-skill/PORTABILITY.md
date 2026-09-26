@@ -44,10 +44,13 @@ The line to inline in any skill that runs project commands:
 
 For a workspace URL, cloud id, org, project key or account id, in this fixed order:
 
-1. **Ask the API.** Where the tool exposes a discovery call, use it. A single accessible instance is
+1. **Check for a project-recorded tracker config file.** Some projects record workspace and field
+   metadata in a dedicated file (this project's is `JIRA.md`) — read it first when the repo's agent
+   config points to one.
+2. **Ask the API.** Where the tool exposes a discovery call, use it. A single accessible instance is
    used without asking.
-2. **Read the repo.** The agent config or docs usually carry the base URL and the key prefix.
-3. **Ask the user.** The floor, not the plan.
+3. **Read the repo.** The agent config or docs usually carry the base URL and the key prefix.
+4. **Ask the user.** The floor, not the plan.
 
 ## Paths
 
@@ -107,5 +110,5 @@ pass challenges each entry on every run.
 ## Editing an existing skill
 
 Removing a specific must never delete the fact. For each one removed, name it and say where it went
-— the repo's agent config, the project docs, project memory, or a run-time discovery step. A fact
-with no destination is raised with the user, not dropped.
+— the repo's agent config, the project docs, `~/.agents` (after asking), or a run-time discovery
+step. A fact with no destination is raised with the user, not dropped.

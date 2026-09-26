@@ -1,12 +1,18 @@
 ---
 name: write-a-skill
 description: Create or edit agent skills with proper structure, progressive disclosure, bundled resources, and a portability mandate that keeps every skill free of employer, repo, tracker-instance and machine-path names. Use when the user wants to create, write, build, edit or genericise a skill, or to fix a skill an audit flagged as not portable.
+group: meta-utility
 ---
 
 # Writing Skills
 
-Two modes. **Create** writes a new skill. **Edit** changes an existing one, including genericising a
-skill that `skills-audit` flagged as not portable. Both obey the portability mandate below.
+Two modes. **Create** writes a new skill. **Edit** changes an existing one. Two triggers send a
+skill to Edit mode: `skills-audit` flags it as not portable, or `workflow-review` flags it as a
+**restructure** candidate — long and heavily loaded (see that skill's own Buckets section). Both
+modes obey the portability mandate below. Both also write every sentence in the active output
+style: short, one instruction per sentence, no jargon, no filler. That governs every line drafted
+or touched here, not just a final checklist pass — the output style itself states this rule for
+"skill files."
 
 ## Create
 
@@ -15,6 +21,12 @@ skill that `skills-audit` flagged as not portable. Both obey the portability man
    - What specific use cases should it handle?
    - Does it need executable scripts or just instructions?
    - Any reference materials to include?
+   - Which group does it belong to? Run
+     `python3 ~/.agents/skills/catalogue/scripts/catalogue.py --slugs`
+     for the `group:` slugs currently in use and offer them as a fixed
+     list plus "other" — a new value requires confirming it's genuinely
+     new, not a near-duplicate of an existing one. Do not continue to
+     step 2 until a value is set.
 
 2. **Draft the skill** - create:
    - SKILL.md with concise instructions
@@ -25,15 +37,22 @@ skill that `skills-audit` flagged as not portable. Both obey the portability man
    - Does this cover your use cases?
    - Anything missing or unclear?
    - Should any section be more/less detailed?
+4. **Optional: test it before it ships.** For a skill whose output is genuinely uncertain, read
+   [EVALUATE.md](EVALUATE.md)'s eval loop — real test prompts, paired with/without-skill runs,
+   grading, a benchmark, and a static viewer the user reviews. Ask first; never run it unprompted.
 
 ## Edit
 
 1. **Read the whole skill first**, including its bundled files.
 2. **Make the change**, holding the portability mandate over every line you touch.
 3. **When genericising**, list each specific you removed and where the fact went — the repo's agent
-   config, the project's docs, project memory, or a run-time discovery step. Raise anything with no
-   destination instead of dropping it.
-4. **Present the diff and stop.** Committing skill changes belongs to `skills-audit`, which owns the
+   config, the project's docs, `~/.agents` (after asking), or a run-time discovery step. Raise
+   anything with no destination instead of dropping it.
+4. **When restructuring** (a `workflow-review`-flagged candidate), read [EVALUATE.md](EVALUATE.md)'s
+   blind comparison — an independent subagent judges the old and new versions' output with no label
+   on which is which. Optional, but the cheapest way to confirm a split-and-rewrite didn't change
+   behavior.
+5. **Present the diff and stop.** Committing skill changes belongs to `skills-audit`, which owns the
    estate's paths and commits one skill per commit.
 
 ## Portability mandate
@@ -47,7 +66,8 @@ The three rules that decide most lines:
 - **Commands.** Never hardcode a tool binary. Resolve the command from the project manifest, then
   the repo's agent config, then ask. Inline the one-line version of this rule into any skill that
   runs project commands — PORTABILITY.md holds the exact sentence.
-- **Identity.** Resolve a workspace URL, cloud id, org or key prefix by API discovery, then the
+- **Identity.** Resolve a workspace URL, cloud id, org or key prefix by checking a project-recorded
+  tracker config file first (when the repo's agent config names one), then API discovery, then the
   repo, then ask. Never write the value into the skill.
 - **Paths.** Skill-relative or self-referential, plus a driven tool's `$XDG_CONFIG_HOME` config, that
   tool's own `~/.<tool>/` state directory, and a path the estate config declares. A user-chosen
@@ -70,12 +90,19 @@ skill-name/
     └── helper.js
 ```
 
+This skill's own directory carries the optional eval tooling `EVALUATE.md` points to:
+`scripts/` (`quick_validate.py`, `run_eval.py`, `run_loop.py`, `improve_description.py`,
+`generate_report.py`, `aggregate_benchmark.py`, `utils.py`), `agents/` (`grader.md`,
+`comparator.md`, `analyzer.md`), `references/schemas.md`, and `eval-viewer/`. Results land in a
+sibling `<skill-name>-workspace/` directory, gitignored — never commit it.
+
 ## SKILL.md Template
 
 ```md
 ---
 name: skill-name
 description: Brief description of capability. Use when [specific triggers].
+group: <slug>
 ---
 
 # Skill Name
@@ -137,16 +164,24 @@ Scripts save tokens and improve reliability vs generated code.
 
 Split into separate files when:
 
-- SKILL.md exceeds 100 lines
+- SKILL.md exceeds 500 lines
 - Content has distinct domains (finance vs sales schemas)
-- Advanced features are rarely needed
+- A section passes both of these tests. First: it's a complete, self-contained procedure with its
+  own internal structure — a round-by-round loop, a file-format spec — not orienting material that
+  only makes sense woven into the surrounding flow. Second: it's only needed once execution
+  actually reaches that phase, not needed to understand the skill's overall shape. `implement`'s
+  `REVIEW-LOOP.md` and `QUALITY-PASSES.md` are the worked example. Branch/worktree/commit setup
+  stayed inline — sequential, needed to follow the flow. The review loop's round mechanics and the
+  quality-pass dispatch order moved out — self-contained, read only once that phase starts.
 
 ## Review Checklist
 
 After drafting, verify:
 
 - [ ] Description includes triggers ("Use when...")
-- [ ] SKILL.md under 100 lines
+- [ ] SKILL.md under 500 lines
+- [ ] Every sentence follows the active output style — short, one instruction each, no jargon
+- [ ] `group:` set to one of the values currently in use, or a confirmed new one
 - [ ] No time-sensitive info
 - [ ] Consistent terminology
 - [ ] Concrete examples included
