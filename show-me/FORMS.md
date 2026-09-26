@@ -24,6 +24,45 @@ every row. A wall that follows each row's longest label is the most common way a
 drawing comes out wrong. A sequence's lanes hold one column each for the whole
 drawing; a label too long for its gap breaks onto its own row inside that gap.
 
+Generate every individual box — a Pseudocode box, a State/ER entity or state
+box — with [scripts/box.py](scripts/box.py). Don't hand-type its border.
+Pass it a JSON array of `{"title", "lines"}` on stdin. It pads every line to
+one fixed width, builds the border to match, and fails loudly if a box
+would misalign. Its own check replaces steps 1–3 below for that one box.
+
+What it does not draw still needs the checklist run by hand: the
+cardinality edge between two ER entities, a state machine's transition
+arrows, a sequence's lanes, a tree's branches.
+
+Column math by eye is unreliable — do not trust it. Run this checklist
+before showing a connector between boxes or any non-box diagram (sequence,
+call tree, file tree, component tree), and again every time you copy,
+paste, or retype one into a new place — a verbatim copy still needs the
+check, because "it's just a copy" is exactly how an unverified diagram gets
+carried forward unchanged:
+
+1. List every border character (`┌┐└┘│┬┴├┤▼►◄▲`) in the diagram with its row
+   number and column index. Do this for the actual text, not from memory or
+   by eye — script it (e.g. enumerate characters in each line) rather than
+   counting columns by reading the drawing.
+2. Group the listed positions by the box or connector line they belong to.
+3. For each group, confirm every row in it shares the same column for its
+   left wall, right wall, and corners. A vertical connector that spans
+   several rows (an arrow's shaft, a merge line) is a group too, not only a
+   box — its column must match on every row it appears on, including the
+   corner it terminates into.
+4. Check for a blank row inside a connector's span — a row where that
+   column should carry `│` but has a space instead. That is a broken line,
+   not a stylistic gap, even when the rows above and below it are correctly
+   aligned.
+5. Fix any column that disagrees or any blank mid-connector row, then redo
+   steps 1–4 on the corrected diagram. Repeat until nothing disagrees.
+
+A drawing that skips this checklist is not done — that includes a diagram
+you are only relaying (a plan's diagram going into a ticket, a ticket's
+diagram going into a report), not only one you are drawing for the first
+time.
+
 A drawing that was approved in a terminal goes into a working document
 character-for-character. Re-authoring it in another notation makes it a new
 drawing that nobody signed off. The one deliberate exception is a share-out
@@ -81,21 +120,32 @@ on(save)
 ```
 
 A method belonging to a file this plan adds or changes is boxed under that
-file's real name, title-bar style. Above every method: a concise doc comment
-in that file's own real language convention (`/** */` for TS/JS, `"""..."""`
-for Python, `///` for Rust, …) — always, even when the signature looks
-obvious, since the body below is about to be omitted. The body itself is
-elided — no internal logic — except a `calls:` line naming another method
-this same change adds or modifies; a call into anything existing or external
-stays out, however central it is to what the method does. A module-level
-constant or type declaration is exempt from elision — it has no body to
-elide in the first place, so it's shown in full, always. Methods that share
-a file and share a state — all new, or the same side of a before/after pair
-(see below) — share one box instead of repeating the title bar. A class
-wrapping the shown methods (`class Foo extends Bar { … }`) gets its own line
-only when it carries a contract beyond its methods — a meaningful base
-class, a shape, an invariant, or its own static fields that aren't methods.
-A pure method-bag flattens under the file title with no class line at all:
+file's real name, title-bar style.
+
+Above every method, add a concise doc comment in that file's own real
+language convention (`/** */` for TS/JS, `"""..."""` for Python, `///` for
+Rust, …). Add it always, even when the signature looks obvious — the body
+below is about to be omitted.
+
+The body itself is elided — no internal logic. The one exception is a
+`calls:` line naming another method this same change adds or modifies. A
+call into anything existing or external stays out, however central it is
+to what the method does.
+
+A module-level constant or type declaration is exempt from elision. It has
+no body to elide in the first place, so it's shown in full, always.
+
+Methods that share a file and share a state — all new, or the same side of
+a before/after pair (see below) — share one box instead of repeating the
+title bar.
+
+A class wrapping the shown methods (`class Foo extends Bar { … }`) gets its
+own line only when it carries a contract beyond its methods — a meaningful
+base class, a shape, an invariant, or its own static fields that aren't
+methods. A pure method-bag flattens under the file title with no class
+line at all.
+Generate the box itself with [scripts/box.py](scripts/box.py) — see its
+docstring for the input format:
 
 ```text
 ┌─ rate-limiter.dao.ts ─────────────┐
@@ -184,7 +234,11 @@ Mermaid `sequenceDiagram` is the same form on a share-out surface.
 
 **State or ER** — a data model or a machine, drawn as boxes and labelled edges.
 An entity carries its name in a title row, its fields under the separator, and
-its cardinality on the edge:
+its cardinality on the edge. Generate each entity's or state's own box with
+[scripts/box.py](scripts/box.py) — pad a field's name and its PK/FK marker to
+line up yourself before passing the row, since the script only guarantees the
+outer wall. The cardinality edge or transition arrow connecting two boxes is
+placed and checked by hand, following the checklist above:
 
 ```text
 ┌──────────────────┐        ┌──────────────────┐

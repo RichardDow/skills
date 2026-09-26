@@ -13,6 +13,7 @@ This skill is a fork of `show-me` from
 | deltas | "highlight changes" (general) | a diff convention per form: component diff, file-tree diff, call-tree diff, control-flow diff, today/tomorrow for a cross-service path |
 | pseudocode | "show algorithms as plain-text steps" | doc comment per method, body elided except a `calls:` line, before/after boxing for a changed method, rule for when a class earns its own box |
 | reuse | standalone | cited as the shared vocabulary by `grill-me` and `plan-in-docs`, instead of each restating it |
+| box alignment | manual column-by-column checklist for every box | [scripts/box.py](scripts/box.py) generates and self-checks each individual Pseudocode/State/ER box; the checklist now covers only connectors and non-box forms |
 
 Upstream states principles ("pick the smallest view," "match product aesthetics").
 This fork also states mechanics — exact column widths, when a diff outranks a
