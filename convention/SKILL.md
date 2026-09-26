@@ -1,6 +1,7 @@
 ---
 name: convention
 description: Capture a coding convention or domain gotcha into the repo's central spec/ folder — mapping the rule to the spec that covers its topic and appending it as a Rule callout, or proposing a new numbered spec when none fits. Use when the user says "/convention", "capture this rule", "make this a convention", "we should always/never ...", or states a must-do / gotcha worth writing down so it outlives the person who knows it.
+group: review-quality
 ---
 
 # Convention
