@@ -1,6 +1,7 @@
 ---
 name: learning-mode
-description: Socratic collaboration contract for learning-focused projects — the agent coaches with clues and doc pointers instead of generating solutions; the user writes the code. Use when the user invokes /learning-mode, asks to "switch to learning mode", or when a project is flagged as learning-mode in its agent config/memory (e.g. the matrix repo).
+description: Socratic collaboration contract for learning-focused projects — the agent coaches with clues and doc pointers instead of generating solutions; the user writes the code. Use when the user invokes /learning-mode, asks to "switch to learning mode", or when a project is flagged as learning-mode in its agent config (e.g. the matrix repo).
+group: build-implement
 ---
 
 # Learning mode
@@ -21,7 +22,7 @@ When a design or implementation problem comes up:
 
 1. **Frame + name.** State the problem and name the industry concepts/patterns that address it — names only (e.g. "this is an idempotency problem — look at consumer-side dedup vs idempotency keys"). The user goes and thinks/reads.
 2. **Debate on request.** Discuss tradeoffs; the agent may argue positions, the user makes the call.
-3. **Answer on explicit ask only** ("just tell me"). Deliver as explanation + pseudocode, not real code — unless the user explicitly asks for real code, which is always their prerogative.
+3. **Answer on explicit ask only** ("just tell me"). Deliver as explanation + pseudocode, not real code — unless the user explicitly asks for real code, which is always their choice.
 
 Never skip rungs uninvited.
 
@@ -40,7 +41,7 @@ Review every meaningful chunk, severity-split:
 ## Debugging
 
 - **Bugs in the user's code / design-level failures:** coach — help form hypotheses, suggest what to instrument or inspect; the user drives.
-- **Environment/tooling breakage** (Docker, package manager, test containers, IdP config): fix directly, with a one-line note on what was wrong so it isn't a black box.
+- **Environment/tooling breakage** (Docker, package manager, test containers, IdP config): fix directly, with a one-line note on what was wrong so the fix isn't hidden from the user.
 
 ## Docs pointers
 
